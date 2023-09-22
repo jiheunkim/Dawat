@@ -1,4 +1,7 @@
 # How to contribute
+> ⚠️ Every contributor needs to use Git and install Git-LFS extension. Read section
+> [Git-LFS](#git-lfs) for more information.
+
 The repository hosts an internal project of Norispace. Only allowed members can
 contribute. This project follows main and feature branch scheme to accept
 contributions. The procedure is following
@@ -34,8 +37,44 @@ first.
 
 - Review what you are committing
 
-    Avoid committing large files by mistakes. Feel free to update `.gitignore` file.
+    Avoid committing cache files or large files by mistakes. Feel free to update
+    `.gitignore` file.
 
+
+## Git-LFS
+Git LFS is an Git extension to track large blobs or binary files, that are not suitable
+for Git to work with. Follow the link (https://git-lfs.com/) to install the extension.
+
+**tl;dr**
+1. Install Git-LFS extension (per user)
+
+    `git lfs install`
+
+2. Add (`git add`) a blob and see if it is tracked properly (`git status -v` or `git
+   diff --cached`) by lfs extension
+
+    ```bash
+    # 1. add the blob
+    $ git add blob.jpg
+
+    # 2. check if it is tracked by lfs
+    # You should see something like below, which indicates lfs will track this file.
+    #   version https://git-lfs.github.com/spec/v1
+    #   oid sha256:cb7b3b27e5cfff2e64c15e2172bb46ba35e542ac4b66043726b8de449144f8f9
+    #   size 268721
+    $ git status -v
+
+    # 2'. or use diff
+    $ git diff --cached
+
+    # 3. (optional) if you do not see lfs msg like above, first check if lfs extension
+    # was installed correctly. Next, check the `.gitattributes` file to see what file
+    # extensions are listed to use lfs. Feel free to add more to the list.
+    # this example let lfs tracks .pdf files.
+    $ git track "*.pdf"
+    ```
+
+3. Commit if everything looks fine
 
 
 ## How to open a PR
