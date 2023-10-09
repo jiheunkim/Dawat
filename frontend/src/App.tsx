@@ -1,7 +1,14 @@
 import React from "react";
+import { Outlet } from "react-router-dom";
+import ToolHeader from "./components/ToolHeader";
 
 function App() {
-  return <div className="App">start</div>;
+  return (
+    <>
+      <ToolHeader />
+      <Outlet />
+    </>
+  );
 }
 
 export default App;
