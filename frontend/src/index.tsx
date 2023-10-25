@@ -16,13 +16,11 @@ const root = ReactDOM.createRoot(
 const queryClient = new QueryClient();
 
 root.render(
-  <React.StrictMode>
-    <RecoilRoot>
-      <AppContextProvider>
-        <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
-        </QueryClientProvider>
-      </AppContextProvider>
-    </RecoilRoot>
-  </React.StrictMode>
+  <RecoilRoot>
+    <AppContextProvider>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </AppContextProvider>
+  </RecoilRoot>
 );
