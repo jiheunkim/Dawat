@@ -2,12 +2,15 @@
 
 import { Link } from "react-router-dom";
 import { MdNewLabel } from "react-icons/md";
-import { LuGalleryThumbnails } from "react-icons/lu";
+import { LuGalleryThumbnails, LuUpload } from "react-icons/lu";
 import Regions from "./Regions";
 import RegionsList from "./RegionsList";
 import RegionSelectorSidebarBox from "./Annotator/RegionSelectorSidebarBox";
 import getActiveImage from "../reducers/get-active-image";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import ImageUpload from "./ImageUpload";
+
 
 function ToolSideBar({ state, dispatch }) {
   const { activeImage } = getActiveImage(state);
@@ -28,6 +31,20 @@ function ToolSideBar({ state, dispatch }) {
     return fn;
   };
 
+  const [image, setImage] = useState(null);
+
+  const handleImageUpload = (imageFile) => {
+    // 이미지 파일을 서버로 업로드하거나 상태 관리
+    // 예: 서버로 이미지 업로드 후, 이미지 URL을 받아와서 상태로 저장
+
+    // 이미지를 Home 컴포넌트로 전달
+    setImage({ src: URL.createObjectURL(imageFile) });
+
+    // 라우팅된 Home 컴포넌트로 이동 (예: /home 경로로)
+    // const navigate = useNavigate();
+    // navigate("/home");
+  };
+
   const linkTailwind =
     "px-2 py-5 flex flex-col justify-center items-center hover:bg-gray-700 rounded-lg transition-all";
   return (
@@ -37,6 +54,9 @@ function ToolSideBar({ state, dispatch }) {
     >
       <div className="w-14 md:w-28 h-screen overflow-y-auto text-white pt-20 px-1 md:px-3 bg-gray-900 dark:bg-gray-800 transition-width">
         <ul className="space-y-3">
+          <li>
+            <ImageUpload onImageUpload={handleImageUpload} />
+          </li>
           <li>
             <Link className={linkTailwind} to={"#"}>
               <MdNewLabel className="text-3xl md:text-4xl" />
