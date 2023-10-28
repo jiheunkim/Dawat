@@ -12,6 +12,8 @@ import imageReducer from "../../reducers/image-reducer.js";
 import useEventCallback from "use-event-callback";
 import videoReducer from "../../reducers/video-reducer.js";
 import ToolSideBar from "../ToolSideBar";
+import { useRecoilState } from "recoil";
+import { docImgSrcState } from "../../atoms";
 
 const Annotator = ({
   images,
@@ -56,12 +58,14 @@ const Annotator = ({
   hideSave,
   allowComments,
 }) => {
-  if (typeof selectedImage === "string") {
-    selectedImage = (images || []).findIndex(
-      (img) => img.src === selectedImage
-    );
-    if (selectedImage === -1) selectedImage = undefined;
-  }
+  // ?
+  // if (typeof selectedImage === "string") {
+  //   selectedImage = (images || []).findIndex(
+  //     (img) => img.src === selectedImage
+  //   );
+  //   if (selectedImage === -1) selectedImage = undefined;
+  // }
+  const [docImgSrc, setDocImgSrc] = useRecoilState(docImgSrcState);
   const annotationType = images ? "image" : "video";
   const [state, dispatchToReducer] = useReducer(
     historyHandler(
@@ -133,8 +137,16 @@ const Annotator = ({
       type: "SELECT_IMAGE",
       imageIndex: selectedImage,
       image: state.images[selectedImage],
+      newImages: docImgSrc ? [{ name: "test", src: docImgSrc }] : null,
     });
-  }, [selectedImage, state.images]);
+    // if (docImgSrc) {
+    //   dispatchToReducer({
+    //     type: "CHANGE_IMAGES",
+    //     newImages: [{ name: "test", src: docImgSrc }],
+    //   });
+    // } else {
+    // }
+  }, [docImgSrc, selectedImage]);
 
   if (!images && !videoSrc)
     return <span>Missing required prop "images" or "videoSrc"</span>;

@@ -109,17 +109,33 @@ export default (state, action) => {
 
   const setNewImage = (img, index) => {
     let { src, frameTime } = typeof img === "object" ? img : { src: img };
-    return setIn(
-      setIn(state, ["selectedImage"], index),
-      ["selectedImageFrameTime"],
-      frameTime
-    );
+    const { newImages } = action;
+    let nextState = state;
+
+    if (newImages) {
+      nextState = setIn(nextState, ["images"], newImages);
+    }
+
+    nextState = setIn(nextState, ["selectedImage"], index);
+    nextState = setIn(nextState, ["selectedImageFrameTime"], frameTime);
+
+    return nextState;
+
+    // return setIn(
+    //   setIn(state, ["selectedImage"], index),
+    //   ["selectedImageFrameTime"],
+    //   frameTime
+    // );
   };
 
   switch (action.type) {
     case "@@INIT": {
       return state;
     }
+    // case "CHANGE_IMAGES": {
+    //   const { newImages } = action;
+    //   return setIn(state, ["images"], newImages);
+    // }
     case "SELECT_IMAGE": {
       return setNewImage(action.image, action.imageIndex);
     }
@@ -858,6 +874,7 @@ export default (state, action) => {
           return state;
       }
     }
+
     case "SELECT_TOOL": {
       if (action.selectedTool === "show-tags") {
         setInLocalStorage("showTags", !state.showTags);

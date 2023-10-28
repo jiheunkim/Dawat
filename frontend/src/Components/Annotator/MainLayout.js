@@ -1,7 +1,7 @@
 //
 
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { makeStyles } from "@mui/styles";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { styled } from "@mui/material/styles";

@@ -40,3 +40,8 @@ export const selectedRegionIdState = atom<number | null>({
   key: "selectedRegionIdState",
   default: null,
 });
+
+export const docImgSrcState = atom<string | null>({
+  key: "docImgSrcState",
+  default: null,
+});

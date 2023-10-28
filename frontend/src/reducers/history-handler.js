@@ -1,16 +1,15 @@
-//      
+//
 
-                                                                     
-import { setIn, updateIn, asMutable, without } from "seamless-immutable"
-import moment from "moment"
+import { setIn, updateIn, asMutable, without } from "seamless-immutable";
+import moment from "moment";
 
 const typesToSaveWithHistory = {
   BEGIN_BOX_TRANSFORM: "Transform/Move Box",
   BEGIN_MOVE_POINT: "Move Point",
   DELETE_REGION: "Delete Region",
-}
+};
 
-export const saveToHistory = (state                 , name        ) =>
+export const saveToHistory = (state, name) =>
   updateIn(state, ["history"], (h) =>
     [
       {
@@ -19,12 +18,12 @@ export const saveToHistory = (state                 , name        ) =>
         name,
       },
     ].concat((h || []).slice(0, 9))
-  )
+  );
 
 export default (reducer) => {
-  return (state                 , action        ) => {
-    const prevState = state
-    const nextState = reducer(state, action)
+  return (state, action) => {
+    const prevState = state;
+    const nextState = reducer(state, action);
 
     if (action.type === "RESTORE_HISTORY") {
       if (state.history.length > 0) {
@@ -32,7 +31,7 @@ export default (reducer) => {
           nextState.history[0].state,
           ["history"],
           nextState.history.slice(1)
-        )
+        );
       }
     } else {
       if (
@@ -51,10 +50,10 @@ export default (reducer) => {
           ]
             .concat(nextState.history || [])
             .slice(0, 9)
-        )
+        );
       }
     }
 
-    return nextState
-  }
-}
+    return nextState;
+  };
+};
