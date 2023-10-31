@@ -65,10 +65,10 @@ export const HighlightBox = ({
   const styleCoords =
     r.type === "point"
       ? {
-          left: pbox.x + pbox.w / 2 - 30,
-          top: pbox.y + pbox.h / 2 - 30,
-          width: 60,
-          height: 60,
+          left: pbox.x + pbox.w / 2 - 20,
+          top: pbox.y + pbox.h / 2 - 20,
+          width: 40,
+          height: 40,
         }
       : {
           left: pbox.x - 5,
