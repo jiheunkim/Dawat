@@ -41,7 +41,7 @@ export const examples = {
     // showTags: true,
     images: [
       {
-        src: "https://images.unsplash.com/photo-1496905583330-eb54c7e5915a?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=634&q=80",
+        src: "https://imgv2-2-f.scribdassets.com/img/document/384356419/original/de1b2fd800/1696351202?v=1",
         name: "hot-dogs-1",
       },
       {
