@@ -40,16 +40,16 @@ const ImportBtn = ({
             samScale: samScale,
           });
 
-          console.log("width:"+modelScale?.width);
-          console.log("height:"+modelScale?.height);
+          console.log("width:"+width);
+          console.log("height:"+height);
           console.log("file_name:"+file.name);
 
           formData.append("file", file); // 이미지 파일
 
           const fileData = {
             file_name: file.name,
-            width: modelScale?.width,
-            height: modelScale?.height,
+            width: width,
+            height: height,
           };
 
           const endpointUrl = "http://norispaceserver.iptime.org:8000/upload/image";
