@@ -10,6 +10,7 @@ import {
   faTag,
   faPaintBrush,
   faCrosshairs,
+  faWandMagicSparkles,
   faDrawPolygon,
   faVectorSquare,
   faHandPaper,
@@ -50,6 +51,14 @@ export const iconDictionary = {
       size="xs"
       fixedWidth
       icon={faVectorSquare}
+    />
+  ),
+  "create-everything": () => (
+    <FontAwesomeIcon
+      style={faStyle}
+      size="xs"
+      fixedWidth
+      icon={faWandMagicSparkles}
     />
   ),
   "create-polygon": () => (

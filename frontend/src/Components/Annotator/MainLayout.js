@@ -308,6 +308,13 @@ export const MainLayout = ({
                     getHotkeyHelpText("create_bounding_box"),
                 },
                 {
+                  name: "create-everything",
+                  helperText:
+                    "Add Everything" +
+                    getHotkeyHelpText("create_everything"),
+                    alwaysShowing: true,
+                },
+                {
                   name: "create-polygon",
                   helperText:
                     "Add Polygon" + getHotkeyHelpText("create_polygon"),

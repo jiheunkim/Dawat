@@ -26,6 +26,7 @@ const Annotator = ({
     "select",
     "create-point",
     "create-box",
+    "create-everything",
     "create-polygon",
     "create-line",
     "create-expanding-line",
