@@ -14,6 +14,7 @@ const ImportBtn = ({
   onImageUpload: OnImageUploadFunction;
 }) => {
   const [docImgSrc, setDocImgSrc] = useRecoilState(docImgSrcState);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -32,6 +33,8 @@ const ImportBtn = ({
         img.src = result;
   
         img.onload = () => {
+          setIsLoading(true);
+
           const { height, width, samScale } = handleImageScale(img);
   
           setModelScale({
@@ -87,15 +90,18 @@ const ImportBtn = ({
                 .then((responseData) => {
                   // 성공적인 응답 처리
                   console.log("POST 요청 성공2:", responseData);
+                  setIsLoading(false);
                 })
                 .catch((error) => {
                   // 오류 처리
                   console.error("POST 요청 실패:", error);
+                  setIsLoading(false);
                 });
             })
             .catch((error) => {
               // 오류 처리
               console.error("POST 요청 실패:", error);
+              setIsLoading(false);
             });
   
           setDocImgSrc(result);
@@ -118,6 +124,13 @@ const ImportBtn = ({
         <BiImport className="mr-2 h-5 w-5" />
         <p>Import</p>
       </Button>
+      {isLoading ? (
+          <div className="fixed top-0 right-0 bottom-0 w-full h-screen z-50 overflow-hidden bg-gray-700 opacity-75 flex flex-col items-center justify-center">
+            <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
+            <h2 className="text-center text-white text-xl font-semibold">Loading...</h2><br></br>
+            <p className="text-center text-white">This may take a few seconds, please don't close this page.</p>
+          </div>
+        ) : (
       <input
         ref={fileInputRef}
         id="file-input"
@@ -126,6 +139,7 @@ const ImportBtn = ({
         style={{ display: "none" }}
         onChange={(e) => onUpload(e)}
       />
+      )}
     </>
   );
 };
