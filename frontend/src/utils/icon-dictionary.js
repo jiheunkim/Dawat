@@ -53,7 +53,7 @@ export const iconDictionary = {
       icon={faVectorSquare}
     />
   ),
-  "create-everything": () => (
+  "everything": () => (
     <FontAwesomeIcon
       style={faStyle}
       size="xs"

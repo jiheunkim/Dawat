@@ -120,7 +120,7 @@ export const MainLayout = ({
       {...settings}
       showCrosshairs={
         settings.showCrosshairs &&
-        !["select", "pan", "zoom"].includes(state.selectedTool)
+        !["select", "pan", "zoom", "everything"].includes(state.selectedTool)
       }
       key={state.selectedImage}
       showMask={state.showMask}
@@ -308,7 +308,7 @@ export const MainLayout = ({
                     getHotkeyHelpText("create_bounding_box"),
                 },
                 {
-                  name: "create-everything",
+                  name: "everything",
                   helperText:
                     "Add Everything" +
                     getHotkeyHelpText("create_everything"),
