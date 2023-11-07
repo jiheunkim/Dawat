@@ -6,6 +6,11 @@
 
 import { Tensor } from "onnxruntime-web";
 
+export interface ImgSize {
+  width: number;
+  height: number;
+}
+
 export interface modelScaleProps {
   samScale: number;
   height: number;

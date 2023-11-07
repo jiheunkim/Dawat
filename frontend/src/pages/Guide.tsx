@@ -4,10 +4,9 @@
 // This source code is licensed under the license found in the
 // LICENSE file in the root directory of this source tree.
 
-import { faCrosshairs, faHandPaper, faMousePointer, faSearch, faTag, faVectorSquare, faWandMagicSparkles } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useContext, useEffect, useState } from "react";
-import * as _ from "underscore";
+import { FaMousePointer, FaHandPaper, FaSearch, FaTag, FaCrosshairs, FaVectorSquare } from "react-icons/fa"
+import { FaWandMagicSparkles } from "react-icons/fa6"
 
 const Guide = () => {
 
@@ -37,48 +36,13 @@ const Guide = () => {
                     <p>Choose a tool that allows you to perform the task you desire.</p>
                     <br></br>
                     <div className="">
-                        <FontAwesomeIcon
-                        style={faStyle}
-                        size="xs"
-                        fixedWidth
-                        icon={faMousePointer}
-                        />
-                        <FontAwesomeIcon
-                        style={faStyle}
-                        size="xs"
-                        fixedWidth
-                        icon={faHandPaper}
-                        />
-                        <FontAwesomeIcon
-                        style={faStyle}
-                        size="xs"
-                        fixedWidth
-                        icon={faSearch}
-                        />
-                        <FontAwesomeIcon
-                        style={faStyle}
-                        size="xs"
-                        fixedWidth
-                        icon={faTag}
-                        />
-                        <FontAwesomeIcon
-                        style={faStyle}
-                        size="xs"
-                        fixedWidth
-                        icon={faCrosshairs}
-                        />
-                        <FontAwesomeIcon
-                        style={faStyle}
-                        size="xs"
-                        fixedWidth
-                        icon={faVectorSquare}
-                        />
-                        <FontAwesomeIcon
-                        style={faStyle}
-                        size="xs"
-                        fixedWidth
-                        icon={faWandMagicSparkles}
-                        />
+                        <FaMousePointer />
+                        <FaHandPaper />
+                        <FaSearch />
+                        <FaTag />
+                        <FaCrosshairs />
+                        <FaVectorSquare />
+                        <FaWandMagicSparkles />
                     </div>
                 </div>
             </div>

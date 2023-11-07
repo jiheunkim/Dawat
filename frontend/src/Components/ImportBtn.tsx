@@ -2,9 +2,9 @@ import { Button } from "flowbite-react";
 import React, { useRef, useState } from "react";
 import { BiImport } from "react-icons/bi";
 import { useRecoilState } from "recoil";
-import { docImgSrcState } from "../atoms";
-import { modelScaleProps } from "../helpers/Interfaces";
-import { handleImageScale } from "../helpers/scaleHelper";
+import { modelScaleProps } from "../interfaces/Interfaces";
+import { handleImageScaleForSam } from "../helpers/scaleHelper";
+import { imageState } from "../atoms";
 
 type OnImageUploadFunction = (imageFile: File) => void;
 
@@ -13,7 +13,7 @@ const ImportBtn = ({
 }: {
   onImageUpload: OnImageUploadFunction;
 }) => {
-  const [docImgSrc, setDocImgSrc] = useRecoilState(docImgSrcState);
+  const [image, setImage] = useRecoilState(imageState);
   const [isLoading, setIsLoading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -31,21 +31,21 @@ const ImportBtn = ({
         const result = e.target?.result as string;
         const img = new Image();
         img.src = result;
-  
+
         img.onload = () => {
           setIsLoading(true);
 
-          const { height, width, samScale } = handleImageScale(img);
-  
+          const { height, width, samScale } = handleImageScaleForSam(img);
+
           setModelScale({
             height: height,
             width: width,
             samScale: samScale,
           });
 
-          console.log("width:"+width);
-          console.log("height:"+height);
-          console.log("file_name:"+file.name);
+          console.log("width:" + width);
+          console.log("height:" + height);
+          console.log("file_name:" + file.name);
 
           formData.append("file", file); // 이미지 파일
 
@@ -55,8 +55,10 @@ const ImportBtn = ({
             height: height,
           };
 
-          const endpointUrl = "http://norispaceserver.iptime.org:8000/upload/image";
-          const endpointUrl2 = "http://norispaceserver.iptime.org:8000/process_stored_image";
+          const endpointUrl =
+            "http://norispaceserver.iptime.org:8000/upload/image";
+          const endpointUrl2 =
+            "http://norispaceserver.iptime.org:8000/process_stored_image";
 
           // POST 요청 보내기
           fetch(endpointUrl, {
@@ -103,8 +105,8 @@ const ImportBtn = ({
               console.error("POST 요청 실패:", error);
               setIsLoading(false);
             });
-  
-          setDocImgSrc(result);
+
+          setImage(img);
           onImageUpload(file);
         };
       };
@@ -125,20 +127,25 @@ const ImportBtn = ({
         <p>Import</p>
       </Button>
       {isLoading ? (
-          <div className="fixed top-0 right-0 bottom-0 w-full h-screen z-50 overflow-hidden bg-gray-700 opacity-75 flex flex-col items-center justify-center">
-            <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
-            <h2 className="text-center text-white text-xl font-semibold">Loading...</h2><br></br>
-            <p className="text-center text-white">This may take a few seconds, please don't close this page.</p>
-          </div>
-        ) : (
-      <input
-        ref={fileInputRef}
-        id="file-input"
-        accept="image/*"
-        type="file"
-        style={{ display: "none" }}
-        onChange={(e) => onUpload(e)}
-      />
+        <div className="fixed top-0 right-0 bottom-0 w-full h-screen z-50 overflow-hidden bg-gray-700 opacity-75 flex flex-col items-center justify-center">
+          <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
+          <h2 className="text-center text-white text-xl font-semibold">
+            Loading...
+          </h2>
+          <br></br>
+          <p className="text-center text-white">
+            This may take a few seconds, please don't close this page.
+          </p>
+        </div>
+      ) : (
+        <input
+          ref={fileInputRef}
+          id="file-input"
+          accept="image/*"
+          type="file"
+          style={{ display: "none" }}
+          onChange={(e) => onUpload(e)}
+        />
       )}
     </>
   );

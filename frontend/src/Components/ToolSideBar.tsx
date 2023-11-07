@@ -1,35 +1,8 @@
-"use client";
-
 import { Link } from "react-router-dom";
 import { MdNewLabel } from "react-icons/md";
 import { LuGalleryThumbnails, LuUpload } from "react-icons/lu";
-import Regions from "./Regions";
-import RegionsList from "./RegionsList";
-import RegionSelectorSidebarBox from "./Annotator/RegionSelectorSidebarBox";
-import getActiveImage from "../reducers/get-active-image";
-import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import ImageUpload from "./ImportBtn";
 
-function ToolSideBar({ state, dispatch }) {
-  const { activeImage } = getActiveImage(state);
-  const memoizedActionFns = useRef({});
-  const action = (type, ...params) => {
-    const fnKey = `${type}(${params.join(",")})`;
-    if (memoizedActionFns.current[fnKey])
-      return memoizedActionFns.current[fnKey];
-
-    const fn = (...args) =>
-      params.length > 0
-        ? dispatch({
-            type,
-            ...params.reduce((acc, p, i) => ((acc[p] = args[i]), acc), {}),
-          })
-        : dispatch({ type, ...args[0] });
-    memoizedActionFns.current[fnKey] = fn;
-    return fn;
-  };
-
+function ToolSideBar() {
   const linkTailwind =
     "px-2 py-5 flex flex-col justify-center items-center hover:bg-gray-700 rounded-lg transition-all";
   return (
@@ -55,13 +28,6 @@ function ToolSideBar({ state, dispatch }) {
       </div>
       <div className="h-screen w-full overflow-y-auto pt-20 px-5">
         <p className="text-xl font-bold mb-3">Annotations</p>
-        <RegionSelectorSidebarBox
-          regions={activeImage ? activeImage.regions : []}
-          onSelectRegion={action("SELECT_REGION", "region")}
-          onDeleteRegion={action("DELETE_REGION", "region")}
-          onChangeRegion={action("CHANGE_REGION", "region")}
-        />
-        {/* <RegionsList /> */}
       </div>
     </aside>
   );
