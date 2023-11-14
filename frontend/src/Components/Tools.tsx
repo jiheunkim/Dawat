@@ -10,9 +10,10 @@ import {
 import { FaWandMagicSparkles, FaEllipsis } from "react-icons/fa6";
 const buttonTailwind =
   "m-1 p-2 hover:bg-gray-700 rounded-lg transition-all text-white text-lg";
+const activebuttonTailwind = "bg-gray-700";
 
 // 전체 ToolsBox가 다 drag 가능한 형태여서 수정 필요
-function Tools({ mousePosition }: any) {
+function Tools({ mousePosition, setActiveToolButton }: any) {
   const toolDivRef = useRef<HTMLDivElement>(null);
   const [{ x, y }, setPosition] = useState({
     x: 0,
@@ -22,6 +23,11 @@ function Tools({ mousePosition }: any) {
     right: 20,
     top: "calc((100% - 1100px)/2)",
   });
+  const [activeButton, setActiveButton] = useState("FaHandPaper");
+  const handleButtonClick = (buttonName: string) => {
+    console.log(`${buttonName} 클릭됨`);
+    setActiveButton(buttonName);
+  };
 
   return (
     <div style={{ transform: `translateX(${x}px) translateY(${y}px)` }}
@@ -65,15 +71,37 @@ function Tools({ mousePosition }: any) {
         >
           <FaEllipsis />
         </div>
-        <button className={buttonTailwind} onClick={() => console.log("FaMousePointer 클릭됨")}>
-          <FaMousePointer />
-        </button>
-
-        <button className={buttonTailwind} onClick={() => console.log("FaHandPaper 클릭됨")}>
+        <button
+          className={`${buttonTailwind} ${
+            activeButton === "FaHandPaper" ? activebuttonTailwind : ""
+          }`}
+          onClick={() => {
+            handleButtonClick("FaHandPaper");
+            setActiveToolButton("FaHandPaper");
+          }}
+        >
           <FaHandPaper />
         </button>
-
-        <button className={buttonTailwind} onClick={() => console.log("FaWandMagicSparkles 클릭됨")}>
+        <button
+          className={`${buttonTailwind} ${
+            activeButton === "FaMousePointer" ? activebuttonTailwind : ""
+          }`}
+          onClick={() => {
+            handleButtonClick("FaMousePointer");
+            setActiveToolButton("FaMousePointer");
+          }}
+        >
+          <FaMousePointer />
+        </button>
+        <button
+          className={`${buttonTailwind} ${
+            activeButton === "FaWandMagicSparkles" ? activebuttonTailwind : ""
+          }`}
+          onClick={() => {
+            handleButtonClick("FaWandMagicSparkles");
+            setActiveToolButton("FaWandMagicSparkles");
+          }}
+        >
           <FaWandMagicSparkles />
         </button>
       </div>

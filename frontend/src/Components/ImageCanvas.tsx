@@ -30,6 +30,10 @@ function ImageCanvas() {
   });
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const windowSize = useWindowSize();
+  const [activeToolButton, setActiveToolButton] = useState("FaHandPaper");
+  const [isDragging, setIsDragging] = useState(false);
+  const [cursorStyle, setCursorStyle] = useState("grab");
+
   useEffect(() => {
     const { width, height } = handleImageScaleForCanvas(
       image,
@@ -70,17 +74,56 @@ function ImageCanvas() {
     setMatrix(updateMatrix);
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    const { target } = e;
+    const isImageClick =
+      target instanceof HTMLImageElement && target === imageRef.current;
+  
+    if (activeToolButton === "FaHandPaper" && isImageClick) {
+      setIsDragging((prev) => !prev);
+      setCursorStyle((prevCursor) =>
+        prevCursor === "grab" ? "grabbing" : "grab"
+      );
+  
+      if (!isDragging) {
+        const { left, top } = canvasRef!!.current!!.getBoundingClientRect();
+        imgCoord.current.x = e.clientX - left;
+        imgCoord.current.y = e.clientY - top;
+      }
+    }
+  };
+  
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || activeToolButton !== "FaHandPaper") return;
+  
+    const { left, top } = canvasRef!!.current!!.getBoundingClientRect();
+    const mouseX = e.clientX - left;
+    const mouseY = e.clientY - top;
+  
+    const deltaX = imgCoord.current.x - mouseX;
+    const deltaY = imgCoord.current.y - mouseY;
+  
+    imgCoord.current.x = mouseX;
+    imgCoord.current.y = mouseY;
+  
+    setMatrix((prevMatrix) => compose(prevMatrix, translate(deltaX, deltaY)));
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setCursorStyle("grab");
+  };
+
   return (
     <div
       onWheel={(e) => {
         const direction = e.deltaY > 0 ? 1 : e.deltaY < 0 ? -1 : 0;
         zoomIn(direction, mousePosition.current);
       }}
-      onMouseMove={(e) => {
-        const { left, top } = canvasRef!!.current!!.getBoundingClientRect();
-        mousePosition.current.x = e.clientX - left;
-        mousePosition.current.y = e.clientY - top;
-      }}
+      onMouseMove={handleMouseMove}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      style={{ cursor: cursorStyle }}
       className="mt-16 w-full relative overflow-hidden"
     >
       <canvas className="w-full h-full relative" ref={canvasRef}></canvas>
@@ -93,7 +136,10 @@ function ImageCanvas() {
           ref={imageRef}
         />
       )}
-      <Tools mousePosition={mousePosition.current} />
+      <Tools
+        mousePosition={mousePosition.current}
+        setActiveToolButton={setActiveToolButton}
+      />
     </div>
   );
 }
