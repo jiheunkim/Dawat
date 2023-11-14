@@ -12,7 +12,7 @@ const theme = {
 };
 function ToolHeader() {
   const location = useLocation();
-  const isToolPage = location.pathname === '/tool'; // Tool 페이지 여부 판단
+  const isToolPage = location.pathname.includes('/tool-'); // '/tool-'로 시작하는 페이지 여부 판단
   const [activeLink, setActiveLink] = useState('');
   const [image, setImage] = useState(null);
 
@@ -28,6 +28,9 @@ function ToolHeader() {
   const getButtonStyle = (path: string) => {
     return path === activeLink ? theme.active.on : theme.active.off;
   };
+  const getButtonStyle2 = (path1: string, path2: string) => {
+    return (path1 === activeLink || path2 === activeLink) ? theme.active.on : theme.active.off;
+  };
 
   return (
     <Navbar border fluid className="fixed left-0 right-0 top-0 z-50">
@@ -42,7 +45,7 @@ function ToolHeader() {
           <Navbar.Link theme={theme} href="/" className={getButtonStyle('/')}>
             Home
           </Navbar.Link>
-          <Navbar.Link theme={theme} href="/tool" className={getButtonStyle('/tool')}>
+          <Navbar.Link theme={theme} href="/tool-thumbnails" className={getButtonStyle2('/tool-thumbnails', '/tool-annotation')}>
             Tool
           </Navbar.Link>
           <Navbar.Link theme={theme} href="/howtouse" className={getButtonStyle('/howtouse')}>

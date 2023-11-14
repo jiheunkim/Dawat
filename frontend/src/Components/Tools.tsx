@@ -15,7 +15,7 @@ const buttonTailwind =
 function Tools({ mousePosition }: any) {
   const toolDivRef = useRef<HTMLDivElement>(null);
   const [toolPosition, setToolPosition] = useState({
-    right: 0,
+    right: 20,
     top: "calc((100% - 150px)/2)",
   });
 
