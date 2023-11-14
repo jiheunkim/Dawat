@@ -32,7 +32,7 @@ function ImageCanvas() {
   const windowSize = useWindowSize();
   const [activeToolButton, setActiveToolButton] = useState("FaHandPaper");
   const [isDragging, setIsDragging] = useState(false);
-  const [cursorStyle, setCursorStyle] = useState("grab");
+  const [cursorStyle, setCursorStyle] = useState("");
 
   useEffect(() => {
     const { width, height } = handleImageScaleForCanvas(
@@ -90,6 +90,30 @@ function ImageCanvas() {
         imgCoord.current.x = e.clientX - left;
         imgCoord.current.y = e.clientY - top;
       }
+    } else if (activeToolButton === "FaMousePointer" && isImageClick) {
+      setCursorStyle("default");
+      // FaMousePointer인 경우 좌표 출력
+      const { left, top } = canvasRef!!.current!!.getBoundingClientRect();
+      const mouseX = e.clientX - left;
+      const mouseY = e.clientY - top;
+
+      // 이미지 좌표로 변환
+      const inverseMatrix = inverse(matrix);
+      const imageCoord = applyToPoint(inverseMatrix, { x: mouseX, y: mouseY });
+
+      // 이미지 시작점과 끝점의 좌표 구하기
+      const imageStartX = 0;
+      const imageStartY = 0;
+      const imageEndX = imgSize.width;
+      const imageEndY = imgSize.height;
+
+      // 이미지 시작점으로부터의 상대 좌표로 변환
+      const relativeCoord = {
+        x: (imageCoord.x - imageStartX) / (imageEndX - imageStartX),
+        y: (imageCoord.y - imageStartY) / (imageEndY - imageStartY),
+      };
+
+      console.log("Clicked at (FaMousePointer):", relativeCoord);
     }
   };
   
@@ -111,7 +135,6 @@ function ImageCanvas() {
 
   const handleMouseUp = () => {
     setIsDragging(false);
-    setCursorStyle("grab");
   };
 
   return (
@@ -139,6 +162,7 @@ function ImageCanvas() {
       <Tools
         mousePosition={mousePosition.current}
         setActiveToolButton={setActiveToolButton}
+        setCursorStyle={setCursorStyle}
       />
     </div>
   );

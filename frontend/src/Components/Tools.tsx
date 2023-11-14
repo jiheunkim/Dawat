@@ -13,7 +13,7 @@ const buttonTailwind =
 const activebuttonTailwind = "bg-gray-700";
 
 // 전체 ToolsBox가 다 drag 가능한 형태여서 수정 필요
-function Tools({ mousePosition, setActiveToolButton }: any) {
+function Tools({ mousePosition, setActiveToolButton, setCursorStyle }: any) {
   const toolDivRef = useRef<HTMLDivElement>(null);
   const [{ x, y }, setPosition] = useState({
     x: 0,
@@ -78,6 +78,7 @@ function Tools({ mousePosition, setActiveToolButton }: any) {
           onClick={() => {
             handleButtonClick("FaHandPaper");
             setActiveToolButton("FaHandPaper");
+            setCursorStyle("grab");
           }}
         >
           <FaHandPaper />
@@ -89,6 +90,7 @@ function Tools({ mousePosition, setActiveToolButton }: any) {
           onClick={() => {
             handleButtonClick("FaMousePointer");
             setActiveToolButton("FaMousePointer");
+            setCursorStyle("default");
           }}
         >
           <FaMousePointer />
@@ -100,6 +102,7 @@ function Tools({ mousePosition, setActiveToolButton }: any) {
           onClick={() => {
             handleButtonClick("FaWandMagicSparkles");
             setActiveToolButton("FaWandMagicSparkles");
+            setCursorStyle("auto");
           }}
         >
           <FaWandMagicSparkles />
