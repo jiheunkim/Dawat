@@ -1,0 +1,29 @@
+.annotationlist::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+  }
+  
+  .annotationlist {
+    scrollbar-width: none; /* Firefox */
+  }
+
+.pink {
+    color: rgb(255, 91, 145);
+}
+.orange {
+    color: orange;
+}
+.green {
+    color: greenyellow;
+}
+.blue {
+    color: rgb(117, 216, 255);
+}
+.yellow {
+    color: rgb(249, 249, 77);
+}
+.purple {
+    color: rgb(205, 104, 205);
+}
+.darkgray {
+    color: rgb(55, 55, 55);
+}
