@@ -79,17 +79,25 @@ function ImageCanvas() {
     const isImageClick =
       target instanceof HTMLImageElement && target === imageRef.current;
   
-    if (activeToolButton === "FaHandPaper" && isImageClick) {
-      setIsDragging((prev) => !prev);
-      setCursorStyle((prevCursor) =>
-        prevCursor === "grab" ? "grabbing" : "grab"
-      );
-  
-      if (!isDragging) {
-        const { left, top } = canvasRef!!.current!!.getBoundingClientRect();
-        imgCoord.current.x = e.clientX - left;
-        imgCoord.current.y = e.clientY - top;
-      }
+      if (activeToolButton === "FaHandPaper") {
+        setIsDragging(true);
+        setCursorStyle("grabbing");
+
+        if (!isImageClick) {
+          // 마우스 다운이 이미지 위에서 발생하지 않았을 때만 위치 업데이트
+          const { left, top } = canvasRef!!.current!!.getBoundingClientRect();
+          imgCoord.current.x = e.clientX - left;
+          imgCoord.current.y = e.clientY - top;
+        }
+      } else if (activeToolButton === "FaMousePointer" && isImageClick) {
+        setIsDragging(true);
+        setCursorStyle("grabbing");
+
+        if (isDragging) {
+          const { left, top } = canvasRef!!.current!!.getBoundingClientRect();
+          imgCoord.current.x = e.clientX - left;
+          imgCoord.current.y = e.clientY - top;
+        }
     } else if (activeToolButton === "FaMousePointer" && isImageClick) {
       setCursorStyle("default");
       // FaMousePointer인 경우 좌표 출력
@@ -124,11 +132,11 @@ function ImageCanvas() {
     const mouseX = e.clientX - left;
     const mouseY = e.clientY - top;
   
-    const deltaX = imgCoord.current.x - mouseX;
-    const deltaY = imgCoord.current.y - mouseY;
+    const deltaX = mousePosition.current.x - mouseX;
+    const deltaY = mousePosition.current.y - mouseY;
   
-    imgCoord.current.x = mouseX;
-    imgCoord.current.y = mouseY;
+    mousePosition.current.x = mouseX;
+    mousePosition.current.y = mouseY;
   
     setMatrix((prevMatrix) => compose(prevMatrix, translate(deltaX, deltaY)));
   };
