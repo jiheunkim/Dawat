@@ -1,4 +1,5 @@
 import { atom } from "recoil";
+import { MasksInfo } from "./interfaces/Interfaces";
 
 export interface Region {
   id: number;
@@ -47,5 +48,10 @@ export interface Size {
 
 export const imageState = atom<HTMLImageElement | null>({
   key: "imageState",
+  default: null,
+});
+
+export const masksInfoState = atom<MasksInfo | null>({
+  key: "masksInfoState",
   default: null,
 });

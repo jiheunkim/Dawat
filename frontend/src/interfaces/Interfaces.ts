@@ -32,3 +32,28 @@ export interface modeDataProps {
 export interface ToolProps {
   handleMouseMove: (e: any) => void;
 }
+
+// Mask 관련 interface
+export interface MasksInfo {
+  Image: OriginalImg;
+  annotation: { [key: string]: Annotation };
+}
+
+export interface OriginalImg {
+  image_id: number;
+  width: number;
+  height: number;
+  file_name: string;
+}
+
+export interface Annotation {
+  bbox: number[];
+  area: number;
+  predicted_iou: number;
+  point_coords: Array<number[]>;
+  crop_box: number[];
+  id: number;
+  stability_score: number;
+  segmentation_image_url: string;
+  color: number[];
+}
