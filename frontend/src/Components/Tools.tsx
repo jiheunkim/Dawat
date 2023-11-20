@@ -19,10 +19,6 @@ function Tools({ mousePosition, setActiveToolButton, setCursorStyle }: any) {
     x: 0,
     y: 0,
   });
-  const [toolPosition, setToolPosition] = useState({
-    right: 20,
-    top: "calc((100% - 1100px)/2)",
-  });
   const [activeButton, setActiveButton] = useState("FaHandPaper");
   const handleButtonClick = (buttonName: string) => {
     console.log(`${buttonName} 클릭됨`);
@@ -30,43 +26,41 @@ function Tools({ mousePosition, setActiveToolButton, setCursorStyle }: any) {
   };
 
   return (
-    <div style={{ transform: `translateX(${x}px) translateY(${y}px)` }}
-      onMouseDown={(clickEvent: React.MouseEvent<Element, MouseEvent>) => {
-        const mouseMoveHandler = (moveEvent: MouseEvent) => {
-          const deltaX = moveEvent.screenX - clickEvent.screenX;
-          const deltaY = moveEvent.screenY - clickEvent.screenY;
-
-          setPosition({
-            x: x + deltaX,
-            y: y + deltaY,
-          });
-        };
-
-        const mouseUpHandler = () => {
-          document.removeEventListener('mousemove', mouseMoveHandler);
-        };
-
-        document.addEventListener('mousemove', mouseMoveHandler);
-        document.addEventListener('mouseup', mouseUpHandler, { once: true });
+    <div
+      className="absolute"
+      style={{
+        top: "calc((100% - 158px)/2)",
+        right: 20,
+        transform: `translateX(${x}px) translateY(${y}px)`,
       }}
     >
       <div
-        className="pb-2 flex flex-col absolute bg-gray-900 dark:bg-gray-800 transition-all"
-        style={{ ...toolPosition, borderRadius: "12px" }}
+        className="pb-2 flex flex-col bg-gray-900 dark:bg-gray-800 transition-all"
+        style={{
+          borderRadius: "12px",
+        }}
       >
-        <div   
-          // onMouseDown={(e) => {
-          //   setToolPosition({
-          //     left: mousePosition.x,
-          //     top: mousePosition.y,
-          //   });
-          // }}
-          // onMouseUp={(e) => {
-          //   setToolPosition({
-          //     left: mousePosition.x,
-          //     top: mousePosition.y,
-          //   });
-          // }}
+        <div
+          onMouseDown={(clickEvent: React.MouseEvent<Element, MouseEvent>) => {
+            const mouseMoveHandler = (moveEvent: MouseEvent) => {
+              const deltaX = moveEvent.screenX - clickEvent.screenX;
+              const deltaY = moveEvent.screenY - clickEvent.screenY;
+
+              setPosition({
+                x: x + deltaX,
+                y: y + deltaY,
+              });
+            };
+
+            const mouseUpHandler = () => {
+              document.removeEventListener("mousemove", mouseMoveHandler);
+            };
+
+            document.addEventListener("mousemove", mouseMoveHandler);
+            document.addEventListener("mouseup", mouseUpHandler, {
+              once: true,
+            });
+          }}
           className="cursor-pointer py-1 flex justify-center items-center text-white"
         >
           <FaEllipsis />
