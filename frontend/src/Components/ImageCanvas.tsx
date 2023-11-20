@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilState } from "recoil";
-import { imageState } from "../atoms";
+import { imageState, masksInfoState } from "../atoms";
 import { handleImageScaleForCanvas } from "../helpers/scaleHelper";
 import { ImgSize } from "../interfaces/Interfaces";
 import { useRafState, useWindowSize } from "react-use";
@@ -14,6 +14,10 @@ import {
 } from "transformation-matrix";
 import Tools from "./Tools";
 
+type CanvasObjectType = {
+  [key: string]: HTMLCanvasElement;
+};
+
 function ImageCanvas() {
   // 캔버스에서의 마우스 위치
   const mousePosition = useRef({ x: 0, y: 0 });
@@ -21,6 +25,7 @@ function ImageCanvas() {
   const imgCoord = useRef({ x: 0, y: 0 });
   const imageRef = useRef<HTMLImageElement>(null);
   const [image, setImage] = useRecoilState(imageState);
+  const [masksInfo, setMasksInfo] = useRecoilState(masksInfoState);
   const [matrix, setMatrix] = useState<Matrix>(
     compose(translate(-10, -10), scale(1, 1))
   );
@@ -29,18 +34,11 @@ function ImageCanvas() {
     height: 0,
   });
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const validCanvasRef = useRef<HTMLCanvasElement>(null);
   const windowSize = useWindowSize();
   const [activeToolButton, setActiveToolButton] = useState("FaHandPaper");
   const [isDragging, setIsDragging] = useState(false);
   const [cursorStyle, setCursorStyle] = useState("");
-
-  useEffect(() => {
-    const { width, height } = handleImageScaleForCanvas(
-      image,
-      canvasRef.current
-    );
-    setImgSize({ width, height });
-  }, [image, windowSize]);
 
   const imagePosition = {
     topLeft: applyToPoint(inverse(matrix), { x: 0, y: 0 }),
@@ -58,6 +56,43 @@ function ImageCanvas() {
     height: imagePosition.bottomRight.y - imagePosition.topLeft.y,
     maxWidth: imagePosition.bottomRight.x - imagePosition.topLeft.x,
   };
+
+  useEffect(() => {
+    const { width, height } = handleImageScaleForCanvas(
+      image,
+      canvasRef.current
+    );
+    setImgSize({ width, height });
+    const offscreenCanvases: CanvasObjectType = {};
+    if (masksInfo) {
+      const segments = masksInfo.annotation;
+      const ctx = validCanvasRef.current!!.getContext("2d");
+      Object.keys(segments).forEach((id) => {
+        const segment = segments[id];
+        const offscreenCanvas = document.createElement("canvas");
+        offscreenCanvas.style.left = stylePosition.left.toString() + "px";
+        offscreenCanvas.style.top = stylePosition.top.toString() + "px";
+        offscreenCanvas.width = stylePosition.width;
+        offscreenCanvas.height = stylePosition.height;
+
+        offscreenCanvas.style.width = stylePosition.width.toString() + "px";
+        offscreenCanvas.style.height = stylePosition.height.toString() + "px";
+        console.log(offscreenCanvas.width);
+        console.log(offscreenCanvas.style.height);
+
+        const offscreenCtx = offscreenCanvas.getContext("2d");
+        console.log(offscreenCtx);
+        const maskImage = new Image();
+        maskImage.src = segment.segmentation_image_url;
+        maskImage.onload = function () {
+          offscreenCtx!!.drawImage(maskImage, 0, 0);
+          ctx!!.drawImage(offscreenCanvas, 0, 0);
+          offscreenCanvases[id] = offscreenCanvas;
+        };
+      });
+    }
+    console.log(stylePosition);
+  }, [image, windowSize, masksInfo, matrix]);
 
   const zoomIn = (direction: any, point: any) => {
     const [mx, my] = [point.x, point.y];
@@ -124,10 +159,10 @@ function ImageCanvas() {
       console.log("Clicked at (FaMousePointer):", relativeCoord);
     }
   };
-  
+
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || activeToolButton !== "FaHandPaper") return;
-  
+
     const { left, top } = canvasRef!!.current!!.getBoundingClientRect();
     const mouseX = e.clientX - left;
     const mouseY = e.clientY - top;
@@ -159,14 +194,24 @@ function ImageCanvas() {
     >
       <canvas className="w-full h-full relative" ref={canvasRef}></canvas>
       {image && (
-        <img
-          style={stylePosition}
-          className="absolute"
-          alt="doument"
-          src={image.src}
-          ref={imageRef}
-        />
+        <>
+          <img
+            style={stylePosition}
+            className="absolute"
+            alt="document"
+            src={image.src}
+            ref={imageRef}
+          />
+          <canvas
+            style={stylePosition}
+            width={stylePosition.width}
+            height={stylePosition.height}
+            className="absolute"
+            ref={validCanvasRef}
+          ></canvas>
+        </>
       )}
+
       <Tools
         mousePosition={mousePosition.current}
         setActiveToolButton={setActiveToolButton}

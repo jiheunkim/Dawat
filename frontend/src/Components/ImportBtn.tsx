@@ -4,7 +4,7 @@ import { BiImport } from "react-icons/bi";
 import { useRecoilState } from "recoil";
 import { modelScaleProps } from "../interfaces/Interfaces";
 import { handleImageScaleForSam } from "../helpers/scaleHelper";
-import { imageState } from "../atoms";
+import { imageState, masksInfoState } from "../atoms";
 
 type OnImageUploadFunction = (imageFile: File) => void;
 
@@ -14,6 +14,7 @@ const ImportBtn = ({
   onImageUpload: OnImageUploadFunction;
 }) => {
   const [image, setImage] = useRecoilState(imageState);
+  const [masksInfo, setMasksInfo] = useRecoilState(masksInfoState);
   const [isLoading, setIsLoading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -51,14 +52,14 @@ const ImportBtn = ({
 
           const fileData = {
             file_name: file.name,
-            width: width,
-            height: height,
+            // width: width,
+            // height: height,
           };
 
           const endpointUrl =
-            "http://norispaceserver.iptime.org:8000/upload/image";
+            "http://norispaceserver.iptime.org:8000/upload/image/dawat";
           const endpointUrl2 =
-            "http://norispaceserver.iptime.org:8000/process_stored_image";
+            "http://norispaceserver.iptime.org:8000/process_stored_image/dawat";
 
           // POST 요청 보내기
           fetch(endpointUrl, {
@@ -92,6 +93,7 @@ const ImportBtn = ({
                 .then((responseData) => {
                   // 성공적인 응답 처리
                   console.log("POST 요청 성공2:", responseData);
+                  setMasksInfo(responseData);
                   setIsLoading(false);
                 })
                 .catch((error) => {
