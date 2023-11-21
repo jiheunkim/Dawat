@@ -160,3 +160,21 @@ async def put_bucket(test_info: TestInfo):
         return {"OK"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/upload/pdf/dawat")
+async def upload_image(file: UploadFile = File(...)):
+    pdfgenerator = PDFGenerator()
+    
+    #파일의 원래 이름을 얻어옵니다.
+    file_name = file.filename
+
+    #파일을 저장할 경로를 지정합니다 (workspace/data 디렉토리에 저장합니다).
+    save_path = os.path.join("pdfdata", file_name)
+
+    # 이미지 파일을 저장합니다.
+    with open(save_path, "wb") as pdf_file:
+        pdf_file.write(file.file.read())
+
+    result = pdfgenerator.generate_pdfs(save_path, file_name)
+
+    return result
