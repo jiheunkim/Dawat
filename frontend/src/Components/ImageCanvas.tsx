@@ -13,6 +13,7 @@ import {
   inverse,
 } from "transformation-matrix";
 import Tools from "./Tools";
+import _ from "underscore";
 
 type CanvasObjectType = {
   [key: string]: HTMLCanvasElement;
@@ -39,6 +40,25 @@ function ImageCanvas() {
   const [activeToolButton, setActiveToolButton] = useState("FaHandPaper");
   const [isDragging, setIsDragging] = useState(false);
   const [cursorStyle, setCursorStyle] = useState("");
+  const offscreenCanvases = useRef<CanvasObjectType>({});
+
+  interface ImagePosition {
+    topLeft: PointObjectNotation;
+    bottomRight: PointObjectNotation;
+  }
+
+  const imagePositionCalculator = (
+    width: number,
+    height: number
+  ): ImagePosition => {
+    return {
+      topLeft: applyToPoint(inverse(matrix), { x: 0, y: 0 }),
+      bottomRight: applyToPoint(inverse(matrix), {
+        x: width,
+        y: height,
+      }),
+    };
+  };
 
   const imagePosition = {
     topLeft: applyToPoint(inverse(matrix), { x: 0, y: 0 }),
@@ -63,36 +83,54 @@ function ImageCanvas() {
       canvasRef.current
     );
     setImgSize({ width, height });
-    const offscreenCanvases: CanvasObjectType = {};
-    if (masksInfo) {
-      const segments = masksInfo.annotation;
-      const ctx = validCanvasRef.current!!.getContext("2d");
-      Object.keys(segments).forEach((id) => {
-        const segment = segments[id];
-        const offscreenCanvas = document.createElement("canvas");
-        offscreenCanvas.style.left = stylePosition.left.toString() + "px";
-        offscreenCanvas.style.top = stylePosition.top.toString() + "px";
-        offscreenCanvas.width = stylePosition.width;
-        offscreenCanvas.height = stylePosition.height;
-
-        offscreenCanvas.style.width = stylePosition.width.toString() + "px";
-        offscreenCanvas.style.height = stylePosition.height.toString() + "px";
-        console.log(offscreenCanvas.width);
-        console.log(offscreenCanvas.style.height);
-
-        const offscreenCtx = offscreenCanvas.getContext("2d");
-        console.log(offscreenCtx);
-        const maskImage = new Image();
-        maskImage.src = segment.segmentation_image_url;
-        maskImage.onload = function () {
-          offscreenCtx!!.drawImage(maskImage, 0, 0);
-          ctx!!.drawImage(offscreenCanvas, 0, 0);
-          offscreenCanvases[id] = offscreenCanvas;
-        };
-      });
-    }
-    console.log(stylePosition);
   }, [image, windowSize, masksInfo, matrix]);
+
+  useEffect(() => {
+    const { width, height } = handleImageScaleForCanvas(
+      image,
+      canvasRef.current
+    );
+    if (validCanvasRef.current) {
+      const canvas = validCanvasRef.current;
+      const ctx = canvas.getContext("2d")!!;
+      const maskDrawing = () => {
+        const segments = masksInfo!!.annotation;
+        canvas.width =
+          imagePositionCalculator(width, height).bottomRight.x -
+          imagePositionCalculator(width, height).topLeft.x;
+        canvas.height =
+          imagePositionCalculator(width, height).bottomRight.y -
+          imagePositionCalculator(width, height).topLeft.y;
+
+        console.log(
+          imagePositionCalculator(width, height).bottomRight.x -
+            imagePositionCalculator(width, height).topLeft.x
+        );
+
+        console.log("canvas : ", canvas.width, canvas.height);
+        console.log("canvas.style : ", canvas.style.width, canvas.style.height);
+
+        Object.keys(segments).forEach((id) => {
+          const segment = segments[id];
+          const maskImage = new Image();
+          maskImage.src = segment.segmentation_image_url;
+          maskImage.onload = function () {
+            console.log("hello");
+            ctx.drawImage(
+              maskImage,
+              0,
+              0,
+              stylePosition.width,
+              stylePosition.height
+            );
+          };
+        });
+      };
+      if (masksInfo) {
+        maskDrawing();
+      }
+    }
+  }, [image, masksInfo]);
 
   const zoomIn = (direction: any, point: any) => {
     const [mx, my] = [point.x, point.y];
@@ -101,11 +139,9 @@ function ImageCanvas() {
       typeof direction === "object"
         ? direction.to / copyMatrix.a
         : 1 + 0.2 * direction;
-
     // NOTE: We're mutating matrix here
     let updateMatrix = compose(copyMatrix, translate(mx, my), scale(ratio));
     updateMatrix = compose(updateMatrix, translate(-mx, -my));
-
     setMatrix(updateMatrix);
   };
 
@@ -204,8 +240,6 @@ function ImageCanvas() {
           />
           <canvas
             style={stylePosition}
-            width={stylePosition.width}
-            height={stylePosition.height}
             className="absolute"
             ref={validCanvasRef}
           ></canvas>
