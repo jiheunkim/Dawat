@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import AnnotationEditor from "./AnnotationEditor";
 import AnnotationList from "./AnnotationList";
 import { Segment } from '../interfaces/Interfaces';
-import './AnnotationBox.css';
 
 
 function AnnotationBox() {
