@@ -83,6 +83,10 @@ function ImageCanvas() {
       canvasRef.current
     );
     setImgSize({ width, height });
+    const canvas = canvasRef.current!!;
+    const ctx = canvas.getContext("2d")!!;
+    ctx.fillStyle = "gray";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
   }, [image, windowSize, masksInfo, matrix]);
 
   useEffect(() => {
@@ -93,6 +97,7 @@ function ImageCanvas() {
     if (validCanvasRef.current) {
       const canvas = validCanvasRef.current;
       const ctx = canvas.getContext("2d")!!;
+
       const maskDrawing = () => {
         const segments = masksInfo!!.annotation;
         canvas.width =
@@ -149,26 +154,26 @@ function ImageCanvas() {
     const { target } = e;
     const isImageClick =
       target instanceof HTMLImageElement && target === imageRef.current;
-  
-      if (activeToolButton === "FaHandPaper") {
-        setIsDragging(true);
-        setCursorStyle("grabbing");
 
-        if (!isImageClick) {
-          // 마우스 다운이 이미지 위에서 발생하지 않았을 때만 위치 업데이트
-          const { left, top } = canvasRef!!.current!!.getBoundingClientRect();
-          imgCoord.current.x = e.clientX - left;
-          imgCoord.current.y = e.clientY - top;
-        }
-      } else if (activeToolButton === "FaMousePointer" && isImageClick) {
-        setIsDragging(true);
-        setCursorStyle("grabbing");
+    if (activeToolButton === "FaHandPaper") {
+      setIsDragging(true);
+      setCursorStyle("grabbing");
 
-        if (isDragging) {
-          const { left, top } = canvasRef!!.current!!.getBoundingClientRect();
-          imgCoord.current.x = e.clientX - left;
-          imgCoord.current.y = e.clientY - top;
-        }
+      if (!isImageClick) {
+        // 마우스 다운이 이미지 위에서 발생하지 않았을 때만 위치 업데이트
+        const { left, top } = canvasRef!!.current!!.getBoundingClientRect();
+        imgCoord.current.x = e.clientX - left;
+        imgCoord.current.y = e.clientY - top;
+      }
+    } else if (activeToolButton === "FaMousePointer" && isImageClick) {
+      setIsDragging(true);
+      setCursorStyle("grabbing");
+
+      if (isDragging) {
+        const { left, top } = canvasRef!!.current!!.getBoundingClientRect();
+        imgCoord.current.x = e.clientX - left;
+        imgCoord.current.y = e.clientY - top;
+      }
     } else if (activeToolButton === "FaMousePointer" && isImageClick) {
       setCursorStyle("default");
       // FaMousePointer인 경우 좌표 출력
@@ -202,13 +207,13 @@ function ImageCanvas() {
     const { left, top } = canvasRef!!.current!!.getBoundingClientRect();
     const mouseX = e.clientX - left;
     const mouseY = e.clientY - top;
-  
+
     const deltaX = mousePosition.current.x - mouseX;
     const deltaY = mousePosition.current.y - mouseY;
-  
+
     mousePosition.current.x = mouseX;
     mousePosition.current.y = mouseY;
-  
+
     setMatrix((prevMatrix) => compose(prevMatrix, translate(deltaX, deltaY)));
   };
 
