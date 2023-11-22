@@ -1,31 +1,40 @@
 import React, { useState } from 'react';
 import AnnotationEditor from "./AnnotationEditor";
 import AnnotationList from "./AnnotationList";
+import { Segment } from '../interfaces/Interfaces';
+import './AnnotationBox.css';
 
-interface Segment {
-    id: number;
-    segmentation_image_url: string;
-}
 
 function AnnotationBox() {
     const [selectedSegment, setSelectedSegment] = useState<Segment | null>(null);
     const [selectedAnnotationText, setSelectedAnnotationText] = useState<string>('');
-    const [selectedOnUpdateTitle, setSelectedOnUpdateTitle] = useState<(id: number, title: string) => void>(() => () => {});
+    const [selectedAnnotationTag, setSelectedAnnotationTag] = useState<string[]>([]);
+    const [isEditorVisible, setIsEditorVisible] = useState(false);
 
-    const handleAnnotationClick = (selectedSegment: Segment, annotationText: string) => {
+    const handleAnnotationClick = (selectedSegment: Segment) => {
         setSelectedSegment(selectedSegment);
-        setSelectedAnnotationText(annotationText);
-        
-        setSelectedOnUpdateTitle(() => (id: number, title: string) => {
-            console.log(`Update title for id ${id}: ${title}`);
-        });
+        setSelectedAnnotationText(selectedSegment.title);
+        const tagArray = selectedSegment.tag ? selectedSegment.tag.split(',') : [];
+        setSelectedAnnotationTag(tagArray);
+
+        setIsEditorVisible(true);
+    };
+
+    const handleAnnotationUpdate = (oldKey: string, newKey: string) => {
+        if (selectedSegment && selectedSegment.title === oldKey) {
+            setSelectedAnnotationText(newKey);
+        }
+    };
+
+    const handleTagUpdate = (newTag: string[]) => {
+        setSelectedAnnotationTag(newTag);
     };
 
     return (
         <>
             <aside
                 id="sidebar"
-                className="flex flex-none h-full z-40 w-72 md:w-75 bg-gray-50 transition-width"
+                className="flex flex-none h-full z-30 w-72 md:w-75 bg-gray-50 transition-width"
             >
                 <div className="h-screen w-full overflow-y-auto pt-20 px-5">
                     <p className="text-xl font-bold mb-3">Annotation</p>
@@ -35,7 +44,9 @@ function AnnotationBox() {
             <AnnotationEditor
                 selectedSegment={selectedSegment}
                 annotationText={selectedAnnotationText}
-                onUpdateTitle={selectedOnUpdateTitle}
+                onAnnotationUpdate={handleAnnotationUpdate}
+                annotationTag={selectedAnnotationTag}
+                onTagUpdate={handleTagUpdate}
             />
         </>
     );

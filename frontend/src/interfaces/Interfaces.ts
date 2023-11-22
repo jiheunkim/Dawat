@@ -47,6 +47,7 @@ export interface OriginalImg {
 }
 
 export interface Annotation {
+  title: string;
   bbox: number[];
   area: number;
   predicted_iou: number;
@@ -56,4 +57,15 @@ export interface Annotation {
   stability_score: number;
   segmentation_image_url: string;
   color: number[];
+  tag: string;
+}
+
+export interface Segment {
+  id: number;
+  bbox: number[];
+  area: number;
+  point_coords: Array<number[]>;
+  crop_box: number[];
+  title: string;
+  tag: string;
 }

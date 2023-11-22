@@ -1,9 +1,9 @@
-.annotationlist::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Edge */
-  }
-  
-  .annotationlist {
+* {
+    -ms-overflow-style: none; /* IE, Edge */
     scrollbar-width: none; /* Firefox */
+  }
+  ::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera*/
   }
 
 .pink {

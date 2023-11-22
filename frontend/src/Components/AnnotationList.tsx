@@ -1,11 +1,11 @@
 import { MdCircle, MdDelete } from "react-icons/md";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 import './AnnotationList.css';
+import { useRecoilState } from "recoil";
+import { masksInfoState } from "../atoms";
+import { Segment } from "../interfaces/Interfaces";
 
-interface Segment {
-    id: number;
-    segmentation_image_url: string;
-}
 
 interface AnnotationListProps {
     onAnnotationClick: (selectedSegment: Segment, annotationText: string) => void;
@@ -13,29 +13,42 @@ interface AnnotationListProps {
 
 function AnnotationList({ onAnnotationClick }: AnnotationListProps) {
     const colors = ['pink', 'orange', 'green', 'blue', 'yellow', 'purple'];
-
-    // 실제로는 백엔드 api 연결해서 받아오는 데이터
-    const [segments, setSegments] = useState<Segment[]>([
-        { id: 0, segmentation_image_url: "./mask_0.png" },
-        { id: 1, segmentation_image_url: "./mask_1.png" },
-        { id: 2, segmentation_image_url: "./mask_10.png" },
-        { id: 3, segmentation_image_url: "./mask_19.png" },
-        { id: 4, segmentation_image_url: "./mask_2.png" },
-        { id: 5, segmentation_image_url: "./mask_12.png" },
-        { id: 6, segmentation_image_url: "./mask_21.png" },
-        // ... 추가적인 세그먼트 ...
-    ]);
+    const [annotationInfo, setAnnotationInfo] = useState<Segment[]>([]);
+    const [masksInfo, setMasksInfo] = useRecoilState(masksInfoState);
+    const [fileName, setFileName] = useState('');
     const [selectedSegment, setSelectedSegment] = useState<Segment | null>(null);
-    const [deletedIds, setDeletedIds] = useState<number[]>([]);
+
+    useEffect(() => {
+        if (masksInfo) {
+          const annotationData = masksInfo.annotation;
+          const file_name = masksInfo.Image.file_name;
+          const segmentsArray: Segment[] = [];
+
+          Object.keys(annotationData).forEach((key) => {
+            const segmentData = annotationData[key];
+        
+            const segment: Segment = {
+                id: segmentData.id,
+                bbox: segmentData.bbox,
+                area: segmentData.area,
+                crop_box: segmentData.crop_box,
+                point_coords: segmentData.point_coords,
+                title: segmentData.title,
+                tag: segmentData.tag,
+            };
+        
+            segmentsArray.push(segment);
+          });
+          setAnnotationInfo(segmentsArray);
+          console.log(annotationInfo);
+          setFileName(file_name);
+        }
+    }, [masksInfo]);
 
     // segments 객체의 key를 순회하며 Annotation 항목 렌더링
     const renderAnnotations = () => {
-        return segments.map((segment, index) => {
-            if (deletedIds.includes(segment.id)) {
-                return null; // 삭제된 항목은 렌더링하지 않음
-            }
-
-            const annotationText = `Annotation${index + 1}`;
+        return annotationInfo.map((segment, index) => {
+            const annotationText = segment.title;
 
             return (
                 <div
@@ -52,15 +65,27 @@ function AnnotationList({ onAnnotationClick }: AnnotationListProps) {
 
     // Annotation 항목 클릭 이벤트 핸들러
     const handleItemClick = (segment: Segment) => {
-        onAnnotationClick(segment, `Annotation${segment.id + 1}`);
+        setSelectedSegment(segment);
+        onAnnotationClick(segment, segment.title);
         console.log(`Annotation ${segment.id} clicked`);
     };
 
     // Annotation 항목 삭제 이벤트 핸들러
-    const handleDelete = (id: number) => {
-        if (!deletedIds.includes(id)) {
-            setDeletedIds((prevIds) => [...prevIds, id]);
-        }
+    const handleDelete = async (id: number) => {
+        console.log(fileName, id.toString());
+            try {
+              // 백엔드 API로 삭제 요청 보내기
+              const response = await axios.post('http://norispaceserver.iptime.org:8000/delete_key', {
+                image_name: fileName,
+                id: id,
+              });
+      
+              // 백엔드로부터 받은 데이터를 이용하여 상태 업데이트
+              setMasksInfo(response.data);
+              console.log(response.data);
+            } catch (error) {
+              console.error('Error deleting annotation:', error);
+            }
     };
 
     return (
