@@ -23,58 +23,46 @@ const ImportBtn = ({
   // The modelScale state variable keeps track of the scale values.
   const [modelScale, setModelScale] = useState<modelScaleProps | null>(null);
 
-  const onUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
       const formData = new FormData();
       const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        const img = new Image();
-        img.src = result;
 
-        img.onload = () => {
-          setIsLoading(true);
+      const endpointUrl = 'http://norispaceserver.iptime.org:8000/upload/image/dawat';
+      const endpointUrl2 = 'http://norispaceserver.iptime.org:8000/process_stored_image/dawat';
+      
+      if (file.type === 'application/pdf') {
+        // PDF 파일인 경우
+        formData.append('file', file);
+        const endpointUrl = 'http://norispaceserver.iptime.org:8000/upload/pdf/dawat';
 
-          const { height, width, samScale } = handleImageScaleForSam(img);
-
-          setModelScale({
-            height: height,
-            width: width,
-            samScale: samScale,
+        try {
+          const response = await fetch(endpointUrl, {
+            method: 'POST',
+            body: formData,
           });
 
-          console.log("width:" + width);
-          console.log("height:" + height);
-          console.log("file_name:" + file.name);
+          if (!response.ok) {
+            throw new Error('네트워크 오류');
+          }
 
-          formData.append("file", file); // 이미지 파일
+          const responseData = await response.json();
 
-          const fileData = {
-            file_name: file.name,
-            // width: width,
-            // height: height,
-          };
+          console.log(responseData);
+          
+          // 맨 첫 장의 이미지 URL을 사용하여 이미지 처리
+          const firstPageImageUrl = responseData['0']?.url;
+          const firstPageImageTitle = responseData['0']?.title;
+          if (firstPageImageUrl) {
+            // 맨 첫 장의 이미지를 저장하고 setImage() 함수에 전달
+            const firstPageImage = new Image();
+            firstPageImage.src = firstPageImageUrl;
 
-          const endpointUrl =
-            "http://norispaceserver.iptime.org:8000/upload/image/dawat";
-          const endpointUrl2 =
-            "http://norispaceserver.iptime.org:8000/process_stored_image/dawat";
-
-          // POST 요청 보내기
-          fetch(endpointUrl, {
-            method: "POST",
-            body: formData,
-          })
-            .then((response) => {
-              if (!response.ok) {
-                throw new Error("네트워크 오류");
-              }
-              return response.json();
-            })
-            .then((responseData) => {
-              // 성공적인 응답 처리
-              console.log("POST 요청 성공:", responseData);
+            firstPageImage.onload = () => {
+              const fileData = {
+                file_name: firstPageImageTitle,
+              };
 
               // 2차 POST 요청 보내기
               fetch(endpointUrl2, {
@@ -93,6 +81,7 @@ const ImportBtn = ({
                 .then((responseData) => {
                   // 성공적인 응답 처리
                   console.log("POST 요청 성공2:", responseData);
+                  
                   setMasksInfo(responseData);
                   setIsLoading(false);
                 })
@@ -101,18 +90,84 @@ const ImportBtn = ({
                   console.error("POST 요청 실패:", error);
                   setIsLoading(false);
                 });
-            })
-            .catch((error) => {
-              // 오류 처리
-              console.error("POST 요청 실패:", error);
-              setIsLoading(false);
-            });
+              setImage(firstPageImage);
+              onImageUpload(file);
+            };
+          }
 
-          setImage(img);
-          onImageUpload(file);
+        } catch (error) {
+          console.error('PDF 업로드 및 처리 실패:', error);
+        }
+      } else if (file.type.startsWith('image/')) {
+        // 이미지 파일인 경우
+        reader.onload = (e) => {
+          const result = e.target?.result as string;
+          const img = new Image();
+          img.src = result;
+
+          img.onload = () => {
+            setIsLoading(true);
+
+            formData.append('file', file); // 이미지 파일
+
+            const fileData = {
+              file_name: file.name,
+            };
+
+            // POST 요청 보내기
+            fetch(endpointUrl, {
+              method: "POST",
+              body: formData,
+            })
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error("네트워크 오류");
+                }
+                return response.json();
+              })
+              .then((responseData) => {
+                // 성공적인 응답 처리
+                console.log("POST 요청 성공:", responseData);
+  
+                // 2차 POST 요청 보내기
+                fetch(endpointUrl2, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(fileData), // 데이터를 JSON 문자열로 변환하여 전송
+                })
+                  .then((response) => {
+                    if (!response.ok) {
+                      throw new Error("네트워크 오류");
+                    }
+                    return response.json();
+                  })
+                  .then((responseData) => {
+                    // 성공적인 응답 처리
+                    console.log("POST 요청 성공2:", responseData);
+
+                    setMasksInfo(responseData);
+                    setIsLoading(false);
+                  })
+                  .catch((error) => {
+                    // 오류 처리
+                    console.error("POST 요청 실패:", error);
+                    setIsLoading(false);
+                  });
+              })
+              .catch((error) => {
+                // 오류 처리
+                console.error("POST 요청 실패:", error);
+                setIsLoading(false);
+              });
+  
+            setImage(img);
+            onImageUpload(file);
+          };
         };
-      };
-      reader.readAsDataURL(file);
+        reader.readAsDataURL(file);
+      }
     }
   };
 
@@ -143,7 +198,7 @@ const ImportBtn = ({
         <input
           ref={fileInputRef}
           id="file-input"
-          accept="image/*"
+          accept=".pdf, image/*"
           type="file"
           style={{ display: "none" }}
           onChange={(e) => onUpload(e)}
