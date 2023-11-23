@@ -40,7 +40,7 @@ export interface MasksInfo {
 }
 
 export interface OriginalImg {
-  image_id: number;
+  image_id: string;
   width: number;
   height: number;
   file_name: string;
@@ -50,14 +50,11 @@ export interface Annotation {
   title: string;
   bbox: number[];
   area: number;
-  predicted_iou: number;
+  segmentation: string;
   point_coords: Array<number[]>;
   crop_box: number[];
   id: number;
-  stability_score: number;
-  segmentation_image_url: string;
-  color: number[];
-  tag: string;
+  tag?: string;
 }
 
 export interface Segment {
