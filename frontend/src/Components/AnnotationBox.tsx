@@ -36,7 +36,15 @@ function AnnotationBox() {
                 className="flex flex-none h-full z-30 w-72 md:w-75 bg-gray-50 transition-width"
             >
                 <div className="h-screen w-full overflow-y-auto pt-20 px-5">
-                    <p className="text-xl font-bold mb-3">Annotation</p>
+                    <div className='flex justify-between items-center mb-3'>
+                        <p className="text-xl font-bold">Annotation</p>
+                        <button
+                            // onClick={} // annotation list add 이벤트 추가
+                            className="bg-black text-sm text-white px-4 py-1 rounded-md ml-1"
+                        >
+                            Add
+                        </button>
+                    </div>
                     <AnnotationList onAnnotationClick={handleAnnotationClick} />
                 </div>
             </aside>
