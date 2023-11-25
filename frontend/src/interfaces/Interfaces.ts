@@ -57,12 +57,40 @@ export interface Annotation {
   tag?: string;
 }
 
-export interface Segment {
-  id: number;
-  bbox: number[];
-  area: number;
-  point_coords: Array<number[]>;
-  crop_box: number[];
-  title: string;
-  tag: string;
+// Canvas
+// 마스크 색상 인터페이스
+export interface MaskColor {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
 }
+
+export interface MaskColorWithID extends MaskColor {
+  id: number;
+}
+
+// 이미지 업로드 요청 결과
+export interface ImageUploadResponse {
+  status: string;
+  file_name: string;
+  message: string;
+}
+
+// PdfToPng 변환 요청 결과
+export interface PDFToPNGResponse {
+  [key: string]: {
+    title: string;
+    url: string;
+  };
+}
+
+// export interface Segment {
+//   id: number;
+//   bbox: number[];
+//   area: number;
+//   point_coords: Array<number[]>;
+//   crop_box: number[];
+//   title: string;
+//   tag?: string;
+// }

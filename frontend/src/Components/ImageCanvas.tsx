@@ -1,10 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRecoilState } from "recoil";
-import { imageState, masksInfoState } from "../atoms";
+import {
+  colorPaletteState,
+  imageState,
+  isEditorVisibleState,
+  masksInfoState,
+  selectedAnnotState,
+} from "../atoms";
 import { handleImageScaleForCanvas } from "../helpers/scaleHelper";
 import {
   Annotation,
   ImgSize,
+  MaskColor,
   MasksInfo,
   OriginalImg,
 } from "../interfaces/Interfaces";
@@ -20,10 +27,6 @@ import {
 import Tools from "./Tools";
 import _ from "underscore";
 
-type CanvasObjectType = {
-  [key: string]: HTMLCanvasElement;
-};
-
 function rleDecode(segmentation: string, width: number, height: number) {
   // 이건 RLE를 디코딩해서 1과 0으로 만드는 코드임
   const mask = new Uint8Array(width * height);
@@ -33,13 +36,6 @@ function rleDecode(segmentation: string, width: number, height: number) {
   }
 
   return mask;
-}
-
-interface MaskColor {
-  r: number;
-  g: number;
-  b: number;
-  a: number;
 }
 
 function rletoImageData(
@@ -105,25 +101,32 @@ function ImageCanvas() {
   const [activeToolButton, setActiveToolButton] = useState("FaHandPaper");
   const [isDragging, setIsDragging] = useState(false);
   const [cursorStyle, setCursorStyle] = useState("");
-  const offscreenCanvases = useRef<CanvasObjectType>({});
 
-  interface ImagePosition {
-    topLeft: PointObjectNotation;
-    bottomRight: PointObjectNotation;
-  }
+  const [selectedAnnots, setSelectedAnnots] =
+    useRecoilState(selectedAnnotState);
+  const [isEditorVisible, setIsEditorVisible] =
+    useRecoilState(isEditorVisibleState);
 
-  const imagePositionCalculator = (
-    width: number,
-    height: number
-  ): ImagePosition => {
-    return {
-      topLeft: applyToPoint(inverse(matrix), { x: 0, y: 0 }),
-      bottomRight: applyToPoint(inverse(matrix), {
-        x: width,
-        y: height,
-      }),
-    };
-  };
+  // 이미지 마스크 색상 팔레트
+  const [colorPalette, setColorPalette] = useRecoilState(colorPaletteState);
+
+  // interface ImagePosition {
+  //   topLeft: PointObjectNotation;
+  //   bottomRight: PointObjectNotation;
+  // }
+
+  // const imagePositionCalculator = (
+  //   width: number,
+  //   height: number
+  // ): ImagePosition => {
+  //   return {
+  //     topLeft: applyToPoint(inverse(matrix), { x: 0, y: 0 }),
+  //     bottomRight: applyToPoint(inverse(matrix), {
+  //       x: width,
+  //       y: height,
+  //     }),
+  //   };
+  // };
 
   const imagePosition = {
     topLeft: applyToPoint(inverse(matrix), { x: 0, y: 0 }),
@@ -177,6 +180,10 @@ function ImageCanvas() {
 
           //마스크 랜덤 색상 지정
           const randomColor = getRandomColor();
+          setColorPalette((prev) => [
+            ...prev,
+            { id: annotation.id, ...randomColor },
+          ]);
 
           const imageData = rletoImageData(
             ctx,
@@ -335,21 +342,28 @@ function ImageCanvas() {
           ></canvas>
           <canvas
             onClick={(e) => {
-              console.log();
-              if (currentMaskRef.current && masksInfo) {
-                const currentMaskCanvas = currentMaskRef.current;
-                const currentMaskCtx = currentMaskCanvas.getContext("2d")!!;
-                const mask = currentMask.current!!;
-                const [x, y, segWidth, segHeight] = mask.mask.bbox;
+              const mask = currentMask.current;
 
-                currentMaskCtx.strokeRect(
-                  (x / masksInfo.Image.width) * currentMaskCanvas.width,
-                  (y / masksInfo.Image.height) * currentMaskCanvas.height,
-                  (segWidth * currentMaskCanvas.width) / masksInfo.Image.width,
-                  (segHeight * currentMaskCanvas.height) /
-                    masksInfo.Image.height
-                );
+              if (mask) {
+                // console.log("current mask : ", mask);
+                setSelectedAnnots(mask.mask);
+                setIsEditorVisible(true);
               }
+
+              // if (currentMaskRef.current && masksInfo) {
+              //   const currentMaskCanvas = currentMaskRef.current;
+              //   const currentMaskCtx = currentMaskCanvas.getContext("2d")!!;
+              //   const mask = currentMask.current!!;
+              //   const [x, y, segWidth, segHeight] = mask.mask.bbox;
+
+              //   currentMaskCtx.strokeRect(
+              //     (x / masksInfo.Image.width) * currentMaskCanvas.width,
+              //     (y / masksInfo.Image.height) * currentMaskCanvas.height,
+              //     (segWidth * currentMaskCanvas.width) / masksInfo.Image.width,
+              //     (segHeight * currentMaskCanvas.height) /
+              //       masksInfo.Image.height
+              //   );
+              // }
             }}
             onMouseMove={(e) => {
               if (currentMaskRef.current) {
@@ -390,9 +404,10 @@ function ImageCanvas() {
                   if (smallestMask !== null) {
                     const finalMask: Annotation = smallestMask; // Assertion
                     if (currentMask.current?.mask === finalMask) {
-                      console.log("이전과 똑같은 마스크");
+                      // console.log("이전과 똑같은 마스크");
                       return;
                     } else {
+                      // console.log("final mask: ", finalMask);
                       if (validCanvasRef.current) {
                         const canvas = validCanvasRef.current;
                         const ctx = canvas.getContext("2d")!!;
@@ -409,24 +424,24 @@ function ImageCanvas() {
                           // 현재 마스크 자리에 그려져 있던 색 지우기
                           const [x, y, segWidth, segHeight] =
                             prevMask.mask.bbox;
-                          // currentMaskCtx.clearRect(
-                          //   (x / masksInfo.Image.width) *
-                          //     currentMaskCanvas.width,
-                          //   (y / masksInfo.Image.height) *
-                          //     currentMaskCanvas.height,
-                          //   (segWidth * currentMaskCanvas.width) /
-                          //     masksInfo.Image.width,
-                          //   (segHeight * currentMaskCanvas.height) /
-                          //     masksInfo.Image.height
-                          // );
                           currentMaskCtx.clearRect(
-                            0,
-                            0,
+                            (x / masksInfo.Image.width) *
+                              currentMaskCanvas.width,
+                            (y / masksInfo.Image.height) *
+                              currentMaskCanvas.height,
                             (segWidth * currentMaskCanvas.width) /
                               masksInfo.Image.width,
                             (segHeight * currentMaskCanvas.height) /
                               masksInfo.Image.height
                           );
+                          // currentMaskCtx.clearRect(
+                          //   0,
+                          //   0,
+                          //   (segWidth * currentMaskCanvas.width) /
+                          //     masksInfo.Image.width,
+                          //   (segHeight * currentMaskCanvas.height) /
+                          //     masksInfo.Image.height
+                          // );
 
                           // const prevImageData = rletoImageData(
                           //   ctx,
@@ -523,7 +538,7 @@ function ImageCanvas() {
                   }
                 }
 
-                console.log(mouseX, mouseY);
+                // console.log(mouseX, mouseY);
               }
 
               // const annotations = masksInfo?.annotation;

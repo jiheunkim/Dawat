@@ -1,0 +1,36 @@
+.footer-bg {
+  background-color: #ffffff;
+  justify-content: center;
+  align-items: center;
+  min-height: 189px;
+  border-top: 1px solid #d3d3d3;
+  margin: 0; /* 바깥 여백을 없애기 위해 설정 */
+  padding: 0; /* 안쪽 여백도 없애기 위해 설정 */
+  overflow: hidden; /* 내용이 화면을 벗어나지 않도록 설정 */
+}
+
+.footer-container {
+  font-family: "PretendardVariable";
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 22.16px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80px;
+  margin-top: 30px;
+}
+
+.fa-typo1 {
+  width: 36px;
+  height: 36px;
+  margin-right: 5px;
+}
+
+.info-text {
+  font-family: "Nanum Gothic", sans-serif;
+  text-align: center;
+  font-size: 15px;
+  color: #8e8e8e;
+}

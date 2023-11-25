@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 import { Button, Navbar } from "flowbite-react";
 import { BiImport, BiSolidFileExport } from "react-icons/bi";
 import ImportBtn from "./ImportBtn";
@@ -12,14 +12,9 @@ const theme = {
 };
 function ToolHeader() {
   const location = useLocation();
-  const isToolPage = location.pathname.includes('/tool-'); // '/tool-'로 시작하는 페이지 여부 판단
-  const [activeLink, setActiveLink] = useState('');
+  const isToolPage = location.pathname.includes("/tool-"); // '/tool-'로 시작하는 페이지 여부 판단
+  const [activeLink, setActiveLink] = useState("");
   const [image, setImage] = useState(null);
-
-  const handleImageUpload = (imageFile: File) => {
-    // 이미지 파일을 서버로 업로드하거나 상태 관리
-    // 예: 서버로 이미지 업로드 후, 이미지 URL을 받아와서 상태로 저장
-  };
 
   useEffect(() => {
     setActiveLink(location.pathname);
@@ -29,32 +24,46 @@ function ToolHeader() {
     return path === activeLink ? theme.active.on : theme.active.off;
   };
   const getButtonStyle2 = (path1: string, path2: string) => {
-    return (path1 === activeLink || path2 === activeLink) ? theme.active.on : theme.active.off;
+    return path1 === activeLink || path2 === activeLink
+      ? theme.active.on
+      : theme.active.off;
   };
 
   return (
     <Navbar border fluid className="fixed left-0 right-0 top-0 z-50">
       <Navbar.Brand href="/">
-        <img alt="Dawat Logo" className="mr-1 h-6 sm:h-9" src="/image/dawat_logo_p.png" />
+        <img
+          alt="Dawat Logo"
+          className="mr-1 h-6 sm:h-9"
+          src="/image/dawat_logo_p.png"
+        />
         <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
           DAWAT
         </span>
       </Navbar.Brand>
       <div className="flex items-center">
         <Navbar.Collapse className="mr-5">
-          <Navbar.Link theme={theme} href="/" className={getButtonStyle('/')}>
+          <Navbar.Link theme={theme} href="/" className={getButtonStyle("/")}>
             Home
           </Navbar.Link>
-          <Navbar.Link theme={theme} href="/tool-thumbnails" className={getButtonStyle2('/tool-thumbnails', '/tool-annotation')}>
+          <Navbar.Link
+            theme={theme}
+            href="/tool-thumbnails"
+            className={getButtonStyle2("/tool-thumbnails", "/tool-annotation")}
+          >
             Tool
           </Navbar.Link>
-          <Navbar.Link theme={theme} href="/howtouse" className={getButtonStyle('/howtouse')}>
+          <Navbar.Link
+            theme={theme}
+            href="/howtouse"
+            className={getButtonStyle("/howtouse")}
+          >
             How to Use
           </Navbar.Link>
         </Navbar.Collapse>
         {isToolPage && (
           <div className="flex space-x-3">
-            <ImportBtn onImageUpload={handleImageUpload} />
+            <ImportBtn />
             <Button color="blue">
               <BiSolidFileExport className="mr-2 h-5 w-5" />
               <p>Export</p>
