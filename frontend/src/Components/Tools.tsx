@@ -101,6 +101,18 @@ function Tools({ mousePosition, setActiveToolButton, setCursorStyle }: any) {
         >
           <FaWandMagicSparkles />
         </button>
+        <button
+          className={`${buttonTailwind} ${
+            activeButton === "FaVectorSquare" ? activebuttonTailwind : ""
+          }`}
+          onClick={() => {
+            handleButtonClick("FaVectorSquare");
+            setActiveToolButton("FaVectorSquare");
+            setCursorStyle("default");
+          }}
+        >
+          <FaVectorSquare />
+        </button>
       </div>
     </div>
   );
