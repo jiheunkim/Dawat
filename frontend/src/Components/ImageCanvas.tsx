@@ -360,6 +360,7 @@ function ImageCanvas() {
   const handleMouseUp = () => {
     handleBboxEnd(); // BBOX end
     setIsDragging(false);
+    setCursorStyle("grab");
   };
 
   // 현재 선택된 마스크 타입
