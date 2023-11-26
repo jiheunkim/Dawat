@@ -256,6 +256,7 @@ function ImageCanvas() {
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const { target } = e;
+    const imagePos = getImagePosition();
     const isImageClick =
       target instanceof HTMLImageElement && target === imageRef.current;
 
@@ -306,6 +307,19 @@ function ImageCanvas() {
       };
 
       console.log("Clicked at (FaMousePointer):", relativeCoord);
+    }
+    if (
+      e.clientX >= imagePos.x &&
+      e.clientX <= imagePos.x + imagePos.width &&
+      e.clientY >= imagePos.y &&
+      e.clientY <= imagePos.y + imagePos.height
+    ) {
+      // 여기서 bbox를 시작하세요
+      setBboxStart({
+        x: e.clientX - imagePos.x,
+        y: e.clientY - imagePos.y,
+      });
+      setIsDragging(true);
     }
   };
 
@@ -360,7 +374,11 @@ function ImageCanvas() {
   const handleMouseUp = () => {
     handleBboxEnd(); // BBOX end
     setIsDragging(false);
-    setCursorStyle("grab");
+    if (activeToolButton === "FaHandPaper") {
+      setCursorStyle("grab");
+    } else if (activeToolButton == "FaVectorSquare") {
+      setCursorStyle("crosshair");
+    }
   };
 
   // 현재 선택된 마스크 타입

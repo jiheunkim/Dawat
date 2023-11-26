@@ -108,7 +108,7 @@ function Tools({ mousePosition, setActiveToolButton, setCursorStyle }: any) {
           onClick={() => {
             handleButtonClick("FaVectorSquare");
             setActiveToolButton("FaVectorSquare");
-            setCursorStyle("default");
+            setCursorStyle("crosshair");
           }}
         >
           <FaVectorSquare />
