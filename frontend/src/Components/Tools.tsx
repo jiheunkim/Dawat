@@ -10,48 +10,98 @@ import {
 import { FaWandMagicSparkles, FaEllipsis } from "react-icons/fa6";
 const buttonTailwind =
   "m-1 p-2 hover:bg-gray-700 rounded-lg transition-all text-white text-lg";
+const activebuttonTailwind = "bg-gray-700";
 
-// Todo : 타입 수정해야 함, drag 구현
-function Tools({ mousePosition }: any) {
+// 전체 ToolsBox가 다 drag 가능한 형태여서 수정 필요
+function Tools({ mousePosition, setActiveToolButton, setCursorStyle }: any) {
   const toolDivRef = useRef<HTMLDivElement>(null);
-  const [toolPosition, setToolPosition] = useState({
-    right: 20,
-    top: "calc((100% - 150px)/2)",
+  const [{ x, y }, setPosition] = useState({
+    x: 0,
+    y: 0,
   });
+  const [activeButton, setActiveButton] = useState("FaHandPaper");
+  const handleButtonClick = (buttonName: string) => {
+    console.log(`${buttonName} 클릭됨`);
+    setActiveButton(buttonName);
+  };
 
   return (
     <div
-      className="pb-2 flex flex-col absolute bg-gray-900 dark:bg-gray-800 transition-all"
-      style={{ ...toolPosition, borderRadius: "12px" }}
+      className="absolute"
+      style={{
+        top: "calc((100% - 158px)/2)",
+        right: 20,
+        transform: `translateX(${x}px) translateY(${y}px)`,
+      }}
     >
       <div
-        // onMouseDown={(e) => {
-        //   setToolPosition({
-        //     left: mousePosition.x,
-        //     top: mousePosition.y,
-        //   });
-        // }}
-        // onMouseUp={(e) => {
-        //   setToolPosition({
-        //     left: mousePosition.x,
-        //     top: mousePosition.y,
-        //   });
-        // }}
-        className="cursor-pointer py-1 flex justify-center items-center text-white"
+        className="pb-2 flex flex-col bg-gray-900 dark:bg-gray-800 transition-all"
+        style={{
+          borderRadius: "12px",
+        }}
       >
-        <FaEllipsis />
+        <div
+          onMouseDown={(clickEvent: React.MouseEvent<Element, MouseEvent>) => {
+            const mouseMoveHandler = (moveEvent: MouseEvent) => {
+              const deltaX = moveEvent.screenX - clickEvent.screenX;
+              const deltaY = moveEvent.screenY - clickEvent.screenY;
+
+              setPosition({
+                x: x + deltaX,
+                y: y + deltaY,
+              });
+            };
+
+            const mouseUpHandler = () => {
+              document.removeEventListener("mousemove", mouseMoveHandler);
+            };
+
+            document.addEventListener("mousemove", mouseMoveHandler);
+            document.addEventListener("mouseup", mouseUpHandler, {
+              once: true,
+            });
+          }}
+          className="cursor-pointer py-1 flex justify-center items-center text-white"
+        >
+          <FaEllipsis />
+        </div>
+        <button
+          className={`${buttonTailwind} ${
+            activeButton === "FaHandPaper" ? activebuttonTailwind : ""
+          }`}
+          onClick={() => {
+            handleButtonClick("FaHandPaper");
+            setActiveToolButton("FaHandPaper");
+            setCursorStyle("grab");
+          }}
+        >
+          <FaHandPaper />
+        </button>
+        <button
+          className={`${buttonTailwind} ${
+            activeButton === "FaMousePointer" ? activebuttonTailwind : ""
+          }`}
+          onClick={() => {
+            handleButtonClick("FaMousePointer");
+            setActiveToolButton("FaMousePointer");
+            setCursorStyle("default");
+          }}
+        >
+          <FaMousePointer />
+        </button>
+        <button
+          className={`${buttonTailwind} ${
+            activeButton === "FaWandMagicSparkles" ? activebuttonTailwind : ""
+          }`}
+          onClick={() => {
+            handleButtonClick("FaWandMagicSparkles");
+            setActiveToolButton("FaWandMagicSparkles");
+            setCursorStyle("auto");
+          }}
+        >
+          <FaWandMagicSparkles />
+        </button>
       </div>
-      <button className={buttonTailwind}>
-        <FaMousePointer />
-      </button>
-
-      <button className={buttonTailwind}>
-        <FaHandPaper />
-      </button>
-
-      <button className={buttonTailwind}>
-        <FaWandMagicSparkles />
-      </button>
     </div>
   );
 }

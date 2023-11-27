@@ -8,7 +8,7 @@ function ToolSideBar() {
   const activeLinkTailwind = "bg-gray-700";
 
   return (
-    <aside id="sidebar" className="flex flex-none h-full transition-width">
+    <aside id="sidebar" className="flex flex-none h-full z-40 transition-width">
       <div className="w-14 md:w-24 h-screen overflow-y-auto text-white pt-20 px-1 md:px-3 bg-gray-900 dark:bg-gray-800 transition-width">
         <ul className="space-y-3">
           <li>
