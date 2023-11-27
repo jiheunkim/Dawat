@@ -95,6 +95,7 @@ function ImageCanvas() {
   }
 
   // 캔버스에서의 마우스 위치
+
   const mousePosition = useRef({ x: 0, y: 0 });
   const [bboxStart, setBboxStart] = useState({ x: 0, y: 0 });
   const [bboxrealstart, setBboxrealstart] = useState({ x: 0, y: 0 });
@@ -103,8 +104,10 @@ function ImageCanvas() {
   // 이미지에서의 마우스 위치
   const imgCoord = useRef({ x: 0, y: 0 });
   const imageRef = useRef<HTMLImageElement>(null);
-  const [image, setImage] = useRecoilState(imageState);
+  const [image, setImage] = useRecoilState(imageState); //이거 쓰려면 image.naturalWidth, image.naturalHeight
   const [masksInfo, setMasksInfo] = useRecoilState(masksInfoState);
+  const imageWidth = masksInfo?.Image.width ?? 0; //이미지 전체 가로 크기
+  const imageHeight = masksInfo?.Image.height ?? 0; //이미지 전체 세로 크기
   const [matrix, setMatrix] = useState<Matrix>(
     compose(translate(-10, -10), scale(1, 1))
   );
@@ -363,7 +366,23 @@ function ImageCanvas() {
       imgCoord.current.y = e.clientY - top;
     }
   };
+  function rleDecode222(
+    encodedString: string,
+    width: number,
+    height: number
+  ): number[] {
+    const mask = new Uint8Array(width * height);
+    const segments = encodedString.split(" ").map(Number);
 
+    let cursor = 0;
+    for (let i = 0; i < segments.length; i += 2) {
+      const value = i % 2 === 0 ? 1 : 0; // 짝수 인덱스는 1, 홀수 인덱스는 0
+      mask.fill(value, cursor, cursor + segments[i]);
+      cursor += segments[i];
+    }
+
+    return Array.from(mask);
+  }
   const handleMouseUp = () => {
     //handleBboxEnd(); // BBOX end
     setIsDragging(false);
@@ -373,8 +392,68 @@ function ImageCanvas() {
       setBboxToolActive(false);
       // 여기가 BBOX 왼쪽 상단 좌표랑 오른쪽 하단 좌표야!! 이걸 수정할때 민재한테 넘겨야 함.
       console.log(bboxrealstart, bboxEnd);
+      console.log(rleEncodedMask);
+      const decodedArray = rleDecode(rleEncodedMask, imageWidth, imageHeight);
+      console.log(decodedArray);
     }
   };
+
+  function encodeRLE(binaryMask: number[]): string {
+    let rle = "";
+    let count = 0;
+    let prev = binaryMask[0];
+
+    for (let i = 0; i < binaryMask.length; i++) {
+      if (binaryMask[i] === prev) {
+        count++;
+      } else {
+        rle += `${count} `;
+        count = 1;
+        prev = binaryMask[i];
+      }
+    }
+    rle += `${count}`;
+    return rle;
+  }
+  interface BBox {
+    x: number;
+    y: number;
+  }
+
+  function createBinaryMaskAndRLEEncode(
+    bboxrealstart: BBox,
+    bboxEnd: BBox,
+    imageWidth: number,
+    imageHeight: number
+  ): string {
+    const binaryMask = new Uint8Array(imageWidth * imageHeight).fill(0);
+
+    // 바운딩 박스 내 픽셀에 1 할당
+    for (let y = Math.round(bboxrealstart.y); y < Math.round(bboxEnd.y); y++) {
+      for (
+        let x = Math.round(bboxrealstart.x);
+        x < Math.round(bboxEnd.x);
+        x++
+      ) {
+        binaryMask[y * imageWidth + x] = 1;
+      }
+    }
+
+    // 숫자 배열로 변환
+    const binaryMaskArray = Array.from(binaryMask);
+
+    // RLE 인코딩 수행
+    const rleEncoded = encodeRLE(binaryMaskArray);
+
+    return rleEncoded;
+  }
+
+  const rleEncodedMask = createBinaryMaskAndRLEEncode(
+    bboxrealstart,
+    bboxEnd,
+    imageWidth,
+    imageHeight
+  );
 
   // 현재 선택된 마스크 타입
   interface CurrentMask {
