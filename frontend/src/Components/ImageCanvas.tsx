@@ -79,7 +79,6 @@ function getRandomColor() {
 }
 
 function ImageCanvas() {
-  const bboxCanvasRef = useRef<HTMLCanvasElement>(null);
   function getImagePosition() {
     const imageTopLeft = applyToPoint(inverse(matrix), { x: 0, y: 0 });
     const imageBottomRight = applyToPoint(inverse(matrix), {
@@ -145,26 +144,6 @@ function ImageCanvas() {
     height: imagePosition.bottomRight.y - imagePosition.topLeft.y,
     maxWidth: imagePosition.bottomRight.x - imagePosition.topLeft.x,
   };
-  const handleBboxEnd = () => {
-    setIsDragging(false);
-
-    if (canvasRef.current && bboxToolActive) {
-      const ctx = canvasRef.current.getContext("2d");
-      if (ctx) {
-        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-        ctx.beginPath();
-        ctx.rect(
-          bboxStart.x,
-          bboxStart.y,
-          bboxEnd.x - bboxStart.x,
-          bboxEnd.y - bboxStart.y
-        );
-        ctx.strokeStyle = "red";
-        ctx.stroke();
-      }
-      console.log("BBOX Start:", bboxStart, "BBOX End:", bboxEnd);
-    }
-  };
 
   useEffect(() => {
     const { width, height } = handleImageScaleForCanvas(
@@ -179,10 +158,6 @@ function ImageCanvas() {
   }, [image, windowSize, masksInfo, matrix]);
 
   useEffect(() => {
-    const { width, height } = handleImageScaleForCanvas(
-      image,
-      canvasRef.current
-    );
     if (validCanvasRef.current) {
       const canvas = validCanvasRef.current;
       const ctx = canvas.getContext("2d")!!;
@@ -256,17 +231,23 @@ function ImageCanvas() {
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const { target } = e;
-    const imagePos = getImagePosition();
     const isImageClick =
       target instanceof HTMLImageElement && target === imageRef.current;
 
     // Check if the active tool is FaVectorSquare
     if (activeToolButton === "FaVectorSquare") {
-      if (canvasRef.current) {
-        const rect = canvasRef.current.getBoundingClientRect();
+      if (image && currentMaskRef.current) {
+        const { left, top } = currentMaskRef.current.getBoundingClientRect();
+
+        // 마스크 캔버스에서의 마우스 상대 좌표
+        const mouseX =
+          ((e.clientX - left) / stylePosition.width) * image.naturalWidth;
+        const mouseY =
+          ((e.clientY - top) / stylePosition.height) * image.naturalHeight;
+
         setBboxStart({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
+          x: mouseX,
+          y: mouseY,
         });
         setIsDragging(true); // Start dragging for bbox
       }
@@ -308,53 +289,55 @@ function ImageCanvas() {
 
       console.log("Clicked at (FaMousePointer):", relativeCoord);
     }
-    if (
-      e.clientX >= imagePos.x &&
-      e.clientX <= imagePos.x + imagePos.width &&
-      e.clientY >= imagePos.y &&
-      e.clientY <= imagePos.y + imagePos.height
-    ) {
-      // 여기서 bbox를 시작하세요
-      setBboxStart({
-        x: e.clientX - imagePos.x,
-        y: e.clientY - imagePos.y,
-      });
-      setIsDragging(true);
-    }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    const { left, top } = canvasRef.current?.getBoundingClientRect() || {
-      left: 0,
-      top: 0,
-    };
-    const mouseX = e.clientX - left;
-    const mouseY = e.clientY - top;
-
-    // Update BBOX if the active tool is FaVectorSquare and dragging is true
+    if (!isDragging || !canvasRef.current) {
+      return;
+    }
     if (
       isDragging &&
       activeToolButton === "FaVectorSquare" &&
-      canvasRef.current
+      currentMaskRef.current &&
+      image &&
+      canvasRef.current &&
+      masksInfo
     ) {
-      setBboxEnd({
-        x: mouseX,
-        y: mouseY,
-      });
+      const currentMaskCanvas = currentMaskRef.current;
+      const currentMaskCtx = currentMaskCanvas.getContext("2d")!!;
 
-      const ctx = canvasRef.current.getContext("2d");
-      if (ctx) {
-        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-        ctx.beginPath();
-        ctx.rect(
-          bboxStart.x,
-          bboxStart.y,
-          mouseX - bboxStart.x,
-          mouseY - bboxStart.y
-        );
-        ctx.strokeStyle = "red";
-        ctx.stroke();
-      }
+      const { left, top } = currentMaskRef.current.getBoundingClientRect();
+
+      // 마스크 캔버스에서의 마우스 상대 좌표
+      const mouseX =
+        ((e.clientX - left) / stylePosition.width) * image.naturalWidth;
+      const mouseY =
+        ((e.clientY - top) / stylePosition.height) * image.naturalHeight;
+
+      // Clear previous drawing
+      currentMaskCtx.clearRect(
+        0,
+        0,
+        currentMaskCanvas.width,
+        currentMaskCanvas.height
+      );
+
+      // Calculate top-left corner and dimensions for the bbox
+      const rectX =
+        (Math.min(bboxStart.x, mouseX) / masksInfo.Image.width) *
+        currentMaskCanvas.width;
+      const rectY =
+        (Math.min(bboxStart.y, mouseY) / masksInfo.Image.height) *
+        currentMaskCanvas.height;
+      const rectWidth =
+        (Math.abs(mouseX - bboxStart.x) / masksInfo.Image.width) *
+        currentMaskCanvas.width;
+      const rectHeight =
+        (Math.abs(mouseY - bboxStart.y) / masksInfo.Image.height) *
+        currentMaskCanvas.height;
+
+      // Draw the rectangle
+      currentMaskCtx.strokeRect(rectX, rectY, rectWidth, rectHeight);
     }
 
     // Handle other tool (FaHandPaper) logic for panning the image
@@ -372,12 +355,14 @@ function ImageCanvas() {
   };
 
   const handleMouseUp = () => {
-    handleBboxEnd(); // BBOX end
+    //handleBboxEnd(); // BBOX end
     setIsDragging(false);
     if (activeToolButton === "FaHandPaper") {
       setCursorStyle("grab");
-    } else if (activeToolButton == "FaVectorSquare") {
-      setCursorStyle("crosshair");
+    } else if (bboxToolActive && activeToolButton === "FaVectorSquare") {
+      setBboxToolActive(false);
+      // Finalize bbox position
+      //drawBbox(); // Function to draw bbox
     }
   };
 
