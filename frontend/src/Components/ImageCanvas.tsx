@@ -97,6 +97,7 @@ function ImageCanvas() {
   // 캔버스에서의 마우스 위치
   const mousePosition = useRef({ x: 0, y: 0 });
   const [bboxStart, setBboxStart] = useState({ x: 0, y: 0 });
+  const [bboxrealstart, setBboxrealstart] = useState({ x: 0, y: 0 });
   const [bboxEnd, setBboxEnd] = useState({ x: 0, y: 0 });
   const [bboxToolActive, setBboxToolActive] = useState(false);
   // 이미지에서의 마우스 위치
@@ -338,6 +339,15 @@ function ImageCanvas() {
 
       // Draw the rectangle
       currentMaskCtx.strokeRect(rectX, rectY, rectWidth, rectHeight);
+      //console.log(rectX, rectY, rectX + rectWidth, rectY + rectHeight); 이거 그냥 확인용으로 콘솔창에 출력시킨거
+      setBboxEnd({
+        x: rectX + rectWidth,
+        y: rectY + rectHeight,
+      });
+      setBboxrealstart({
+        x: rectX,
+        y: rectY,
+      });
     }
 
     // Handle other tool (FaHandPaper) logic for panning the image
@@ -359,10 +369,10 @@ function ImageCanvas() {
     setIsDragging(false);
     if (activeToolButton === "FaHandPaper") {
       setCursorStyle("grab");
-    } else if (bboxToolActive && activeToolButton === "FaVectorSquare") {
+    } else if (activeToolButton === "FaVectorSquare") {
       setBboxToolActive(false);
-      // Finalize bbox position
-      //drawBbox(); // Function to draw bbox
+      // 여기가 BBOX 왼쪽 상단 좌표랑 오른쪽 하단 좌표야!! 이걸 수정할때 민재한테 넘겨야 함.
+      console.log(bboxrealstart, bboxEnd);
     }
   };
 
