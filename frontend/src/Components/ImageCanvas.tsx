@@ -79,13 +79,35 @@ function getRandomColor() {
 }
 
 function ImageCanvas() {
+  function getImagePosition() {
+    const imageTopLeft = applyToPoint(inverse(matrix), { x: 0, y: 0 });
+    const imageBottomRight = applyToPoint(inverse(matrix), {
+      x: imgSize.width,
+      y: imgSize.height,
+    });
+
+    return {
+      x: imageTopLeft.x,
+      y: imageTopLeft.y,
+      width: imageBottomRight.x - imageTopLeft.x,
+      height: imageBottomRight.y - imageTopLeft.y,
+    };
+  }
+
   // 캔버스에서의 마우스 위치
+
   const mousePosition = useRef({ x: 0, y: 0 });
+  const [bboxStart, setBboxStart] = useState({ x: 0, y: 0 });
+  const [bboxrealstart, setBboxrealstart] = useState({ x: 0, y: 0 });
+  const [bboxEnd, setBboxEnd] = useState({ x: 0, y: 0 });
+  const [bboxToolActive, setBboxToolActive] = useState(false);
   // 이미지에서의 마우스 위치
   const imgCoord = useRef({ x: 0, y: 0 });
   const imageRef = useRef<HTMLImageElement>(null);
-  const [image, setImage] = useRecoilState(imageState);
+  const [image, setImage] = useRecoilState(imageState); //이거 쓰려면 image.naturalWidth, image.naturalHeight
   const [masksInfo, setMasksInfo] = useRecoilState(masksInfoState);
+  const imageWidth = masksInfo?.Image.width ?? 0; //이미지 전체 가로 크기
+  const imageHeight = masksInfo?.Image.height ?? 0; //이미지 전체 세로 크기
   const [matrix, setMatrix] = useState<Matrix>(
     compose(translate(-10, -10), scale(1, 1))
   );
@@ -100,7 +122,7 @@ function ImageCanvas() {
   const windowSize = useWindowSize();
   const [activeToolButton, setActiveToolButton] = useState("FaHandPaper");
   const [isDragging, setIsDragging] = useState(false);
-  const [cursorStyle, setCursorStyle] = useState("");
+  const [cursorStyle, setCursorStyle] = useState("default");
 
   const [selectedAnnots, setSelectedAnnots] =
     useRecoilState(selectedAnnotState);
@@ -109,24 +131,6 @@ function ImageCanvas() {
 
   // 이미지 마스크 색상 팔레트
   const [colorPalette, setColorPalette] = useRecoilState(colorPaletteState);
-
-  // interface ImagePosition {
-  //   topLeft: PointObjectNotation;
-  //   bottomRight: PointObjectNotation;
-  // }
-
-  // const imagePositionCalculator = (
-  //   width: number,
-  //   height: number
-  // ): ImagePosition => {
-  //   return {
-  //     topLeft: applyToPoint(inverse(matrix), { x: 0, y: 0 }),
-  //     bottomRight: applyToPoint(inverse(matrix), {
-  //       x: width,
-  //       y: height,
-  //     }),
-  //   };
-  // };
 
   const imagePosition = {
     topLeft: applyToPoint(inverse(matrix), { x: 0, y: 0 }),
@@ -158,10 +162,6 @@ function ImageCanvas() {
   }, [image, windowSize, masksInfo, matrix]);
 
   useEffect(() => {
-    const { width, height } = handleImageScaleForCanvas(
-      image,
-      canvasRef.current
-    );
     if (validCanvasRef.current) {
       const canvas = validCanvasRef.current;
       const ctx = canvas.getContext("2d")!!;
@@ -238,12 +238,28 @@ function ImageCanvas() {
     const isImageClick =
       target instanceof HTMLImageElement && target === imageRef.current;
 
-    if (activeToolButton === "FaHandPaper") {
+    // Check if the active tool is FaVectorSquare
+    if (activeToolButton === "FaVectorSquare") {
+      if (image && currentMaskRef.current) {
+        const { left, top } = currentMaskRef.current.getBoundingClientRect();
+
+        // 마스크 캔버스에서의 마우스 상대 좌표
+        const mouseX =
+          ((e.clientX - left) / stylePosition.width) * image.naturalWidth;
+        const mouseY =
+          ((e.clientY - top) / stylePosition.height) * image.naturalHeight;
+
+        setBboxStart({
+          x: mouseX,
+          y: mouseY,
+        });
+        setIsDragging(true); // Start dragging for bbox
+      }
+    } else if (activeToolButton === "FaHandPaper") {
       setIsDragging(true);
       setCursorStyle("grabbing");
 
       if (!isImageClick) {
-        // 마우스 다운이 이미지 위에서 발생하지 않았을 때만 위치 업데이트
         const { left, top } = canvasRef!!.current!!.getBoundingClientRect();
         imgCoord.current.x = e.clientX - left;
         imgCoord.current.y = e.clientY - top;
@@ -257,24 +273,19 @@ function ImageCanvas() {
         imgCoord.current.x = e.clientX - left;
         imgCoord.current.y = e.clientY - top;
       }
-    } else if (activeToolButton === "FaMousePointer" && isImageClick) {
+    } else if (activeToolButton === "FaMousePointer") {
       setCursorStyle("default");
       // FaMousePointer인 경우 좌표 출력
       const { left, top } = canvasRef!!.current!!.getBoundingClientRect();
       const mouseX = e.clientX - left;
       const mouseY = e.clientY - top;
 
-      // 이미지 좌표로 변환
       const inverseMatrix = inverse(matrix);
       const imageCoord = applyToPoint(inverseMatrix, { x: mouseX, y: mouseY });
-
-      // 이미지 시작점과 끝점의 좌표 구하기
       const imageStartX = 0;
       const imageStartY = 0;
       const imageEndX = imgSize.width;
       const imageEndY = imgSize.height;
-
-      // 이미지 시작점으로부터의 상대 좌표로 변환
       const relativeCoord = {
         x: (imageCoord.x - imageStartX) / (imageEndX - imageStartX),
         y: (imageCoord.y - imageStartY) / (imageEndY - imageStartY),
@@ -285,24 +296,164 @@ function ImageCanvas() {
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || activeToolButton !== "FaHandPaper") return;
+    if (!isDragging || !canvasRef.current) {
+      return;
+    }
+    if (
+      isDragging &&
+      activeToolButton === "FaVectorSquare" &&
+      currentMaskRef.current &&
+      image &&
+      canvasRef.current &&
+      masksInfo
+    ) {
+      const currentMaskCanvas = currentMaskRef.current;
+      const currentMaskCtx = currentMaskCanvas.getContext("2d")!!;
 
-    const { left, top } = canvasRef!!.current!!.getBoundingClientRect();
-    const mouseX = e.clientX - left;
-    const mouseY = e.clientY - top;
+      const { left, top } = currentMaskRef.current.getBoundingClientRect();
 
-    const deltaX = mousePosition.current.x - mouseX;
-    const deltaY = mousePosition.current.y - mouseY;
+      // 마스크 캔버스에서의 마우스 상대 좌표
+      const mouseX =
+        ((e.clientX - left) / stylePosition.width) * image.naturalWidth;
+      const mouseY =
+        ((e.clientY - top) / stylePosition.height) * image.naturalHeight;
 
-    mousePosition.current.x = mouseX;
-    mousePosition.current.y = mouseY;
+      // Clear previous drawing
+      currentMaskCtx.clearRect(
+        0,
+        0,
+        currentMaskCanvas.width,
+        currentMaskCanvas.height
+      );
 
-    setMatrix((prevMatrix) => compose(prevMatrix, translate(deltaX, deltaY)));
+      // Calculate top-left corner and dimensions for the bbox
+      const rectX =
+        (Math.min(bboxStart.x, mouseX) / masksInfo.Image.width) *
+        currentMaskCanvas.width;
+      const rectY =
+        (Math.min(bboxStart.y, mouseY) / masksInfo.Image.height) *
+        currentMaskCanvas.height;
+      const rectWidth =
+        (Math.abs(mouseX - bboxStart.x) / masksInfo.Image.width) *
+        currentMaskCanvas.width;
+      const rectHeight =
+        (Math.abs(mouseY - bboxStart.y) / masksInfo.Image.height) *
+        currentMaskCanvas.height;
+
+      // Draw the rectangle
+      currentMaskCtx.strokeRect(rectX, rectY, rectWidth, rectHeight);
+      //console.log(rectX, rectY, rectX + rectWidth, rectY + rectHeight); 이거 그냥 확인용으로 콘솔창에 출력시킨거
+      setBboxEnd({
+        x: rectX + rectWidth,
+        y: rectY + rectHeight,
+      });
+      setBboxrealstart({
+        x: rectX,
+        y: rectY,
+      });
+    }
+
+    // Handle other tool (FaHandPaper) logic for panning the image
+    if (isDragging && activeToolButton === "FaHandPaper" && canvasRef.current) {
+      // Only move the image if dragging and FaHandPaper is active
+      const { left, top } = canvasRef.current.getBoundingClientRect();
+      const deltaX = imgCoord.current.x - (e.clientX - left);
+      const deltaY = imgCoord.current.y - (e.clientY - top);
+
+      setMatrix((prevMatrix) => compose(prevMatrix, translate(deltaX, deltaY)));
+
+      imgCoord.current.x = e.clientX - left;
+      imgCoord.current.y = e.clientY - top;
+    }
   };
+  function rleDecode222(
+    encodedString: string,
+    width: number,
+    height: number
+  ): number[] {
+    const mask = new Uint8Array(width * height);
+    const segments = encodedString.split(" ").map(Number);
 
+    let cursor = 0;
+    for (let i = 0; i < segments.length; i += 2) {
+      const value = i % 2 === 0 ? 1 : 0; // 짝수 인덱스는 1, 홀수 인덱스는 0
+      mask.fill(value, cursor, cursor + segments[i]);
+      cursor += segments[i];
+    }
+
+    return Array.from(mask);
+  }
   const handleMouseUp = () => {
+    //handleBboxEnd(); // BBOX end
     setIsDragging(false);
+    if (activeToolButton === "FaHandPaper") {
+      setCursorStyle("grab");
+    } else if (activeToolButton === "FaVectorSquare") {
+      setBboxToolActive(false);
+      // 여기가 BBOX 왼쪽 상단 좌표랑 오른쪽 하단 좌표야!! 이걸 수정할때 민재한테 넘겨야 함.
+      console.log(bboxrealstart, bboxEnd);
+      console.log(rleEncodedMask);
+      const decodedArray = rleDecode(rleEncodedMask, imageWidth, imageHeight);
+      console.log(decodedArray);
+    }
   };
+
+  function encodeRLE(binaryMask: number[]): string {
+    let rle = "";
+    let count = 0;
+    let prev = binaryMask[0];
+
+    for (let i = 0; i < binaryMask.length; i++) {
+      if (binaryMask[i] === prev) {
+        count++;
+      } else {
+        rle += `${count} `;
+        count = 1;
+        prev = binaryMask[i];
+      }
+    }
+    rle += `${count}`;
+    return rle;
+  }
+  interface BBox {
+    x: number;
+    y: number;
+  }
+
+  function createBinaryMaskAndRLEEncode(
+    bboxrealstart: BBox,
+    bboxEnd: BBox,
+    imageWidth: number,
+    imageHeight: number
+  ): string {
+    const binaryMask = new Uint8Array(imageWidth * imageHeight).fill(0);
+
+    // 바운딩 박스 내 픽셀에 1 할당
+    for (let y = Math.round(bboxrealstart.y); y < Math.round(bboxEnd.y); y++) {
+      for (
+        let x = Math.round(bboxrealstart.x);
+        x < Math.round(bboxEnd.x);
+        x++
+      ) {
+        binaryMask[y * imageWidth + x] = 1;
+      }
+    }
+
+    // 숫자 배열로 변환
+    const binaryMaskArray = Array.from(binaryMask);
+
+    // RLE 인코딩 수행
+    const rleEncoded = encodeRLE(binaryMaskArray);
+
+    return rleEncoded;
+  }
+
+  const rleEncodedMask = createBinaryMaskAndRLEEncode(
+    bboxrealstart,
+    bboxEnd,
+    imageWidth,
+    imageHeight
+  );
 
   // 현재 선택된 마스크 타입
   interface CurrentMask {
@@ -312,6 +463,13 @@ function ImageCanvas() {
   }
 
   const currentMask = useRef<CurrentMask | null>(null);
+  useEffect(() => {
+    if (cursorStyle === "crosshair") {
+      document.body.style.cursor = "crosshair";
+    } else {
+      document.body.style.cursor = "default";
+    }
+  }, [cursorStyle]);
 
   return (
     <div
@@ -349,21 +507,6 @@ function ImageCanvas() {
                 setSelectedAnnots(mask.mask);
                 setIsEditorVisible(true);
               }
-
-              // if (currentMaskRef.current && masksInfo) {
-              //   const currentMaskCanvas = currentMaskRef.current;
-              //   const currentMaskCtx = currentMaskCanvas.getContext("2d")!!;
-              //   const mask = currentMask.current!!;
-              //   const [x, y, segWidth, segHeight] = mask.mask.bbox;
-
-              //   currentMaskCtx.strokeRect(
-              //     (x / masksInfo.Image.width) * currentMaskCanvas.width,
-              //     (y / masksInfo.Image.height) * currentMaskCanvas.height,
-              //     (segWidth * currentMaskCanvas.width) / masksInfo.Image.width,
-              //     (segHeight * currentMaskCanvas.height) /
-              //       masksInfo.Image.height
-              //   );
-              // }
             }}
             onMouseMove={(e) => {
               if (currentMaskRef.current) {
@@ -434,33 +577,6 @@ function ImageCanvas() {
                             (segHeight * currentMaskCanvas.height) /
                               masksInfo.Image.height
                           );
-                          // currentMaskCtx.clearRect(
-                          //   0,
-                          //   0,
-                          //   (segWidth * currentMaskCanvas.width) /
-                          //     masksInfo.Image.width,
-                          //   (segHeight * currentMaskCanvas.height) /
-                          //     masksInfo.Image.height
-                          // );
-
-                          // const prevImageData = rletoImageData(
-                          //   ctx,
-                          //   prevMask.mask.segmentation,
-                          //   masksInfo.Image,
-                          //   prevMask.color
-                          // );
-                          // // 파란색으로 현재 마스크 표시하기
-                          // createImageBitmap(prevImageData).then(function (
-                          //   imgBitmap
-                          // ) {
-                          //   ctx.drawImage(
-                          //     imgBitmap,
-                          //     0,
-                          //     0,
-                          //     stylePosition.width,
-                          //     stylePosition.height
-                          //   );
-                          // });
                         }
                         // 현재 마스크 설정
                         currentMask.current = {
@@ -473,15 +589,6 @@ function ImageCanvas() {
                             a: pixelData[3],
                           },
                         };
-
-                        // 현재 마스크 자리에 그려져 있던 색 지우기
-                        // const [x, y, segWidth, segHeight] = finalMask.bbox;
-                        // ctx.clearRect(
-                        //   (x / masksInfo.Image.width) * canvas.width,
-                        //   (y / masksInfo.Image.height) * canvas.height,
-                        //   (segWidth * canvas.width) / masksInfo.Image.width,
-                        //   (segHeight * canvas.height) / masksInfo.Image.height
-                        // );
 
                         // 파란색으로 현재 마스크 이미지 데이터 만들기
                         const currentImageData = rletoImageData(
@@ -508,183 +615,13 @@ function ImageCanvas() {
                             currentMaskCanvas.height
                           );
                         });
-
-                        // const [x, y, segWidth, segHeight] = finalMask.bbox;
-                        // const [dataX, dataY] = finalMask.point_coords;
-
-                        // ctx.fillStyle = "red";
-
-                        // ctx.strokeRect(
-                        //   (x / masksInfo.Image.width) * canvas.width,
-                        //   (y / masksInfo.Image.height) * canvas.height,
-                        //   (segWidth * canvas.width) / masksInfo.Image.width,
-                        //   (segHeight * canvas.height) / masksInfo.Image.height
-                        // );
-
-                        // createImageBitmap(imageData).then(function (imgBitmap) {
-                        //   ctx.drawImage(
-                        //     imgBitmap,
-                        //     0,
-                        //     0,
-                        //     stylePosition.width,
-                        //     stylePosition.height
-                        //   );
-                        // });
                       }
                     }
-
-                    // console.log("Mask ID:", finalMask.id);
-                    // console.log("Point Coords:", finalMask.point_coords);
                   }
                 }
 
                 // console.log(mouseX, mouseY);
               }
-
-              // const annotations = masksInfo?.annotation;
-              // if (annotations) {
-              //   let smallestMask: Annotation | null = null;
-              //   Object.keys(annotations).forEach((id) => {
-              //     const maskData = annotations[id];
-              //     const bbox = maskData.bbox;
-
-              //     // 클릭된 좌표가 bbox 내부에 있는지 확인
-              //     if (
-              //       mouseX >= bbox[0] &&
-              //       mouseX <= bbox[0] + bbox[2] &&
-              //       mouseY >= bbox[1] &&
-              //       mouseY <= bbox[1] + bbox[3]
-              //     ) {
-              //       // 가장 작은 마스크 선택
-              //       if (!smallestMask || maskData.area < smallestMask.area) {
-              //         smallestMask = maskData;
-              //       }
-              //     }
-              //   });
-              //   if (smallestMask !== null) {
-              //     const finalMask: Annotation = smallestMask; // Assertion
-              //     if (currentMask.current?.mask === finalMask) {
-              //       console.log("이전과 똑같은 마스크");
-              //       return;
-              //     } else {
-              //       if (validCanvasRef.current) {
-              //         const canvas = validCanvasRef.current;
-              //         const ctx = canvas.getContext("2d")!!;
-              //         const pixelData = ctx.getImageData(
-              //           mouseX,
-              //           mouseY,
-              //           1,
-              //           1
-              //         ).data;
-              //         const prevMask = currentMask.current;
-
-              //         // 이전 마스크가 있다면 현재 마스크 표시 지우고, 이전 색으로 다시 마스크 그리기
-              //         if (prevMask) {
-              //           // 현재 마스크 자리에 그려져 있던 색 지우기
-              //           const [x, y, segWidth, segHeight] = prevMask.mask.bbox;
-              //           // ctx.clearRect(
-              //           //   (x / masksInfo.Image.width) * canvas.width,
-              //           //   (y / masksInfo.Image.height) * canvas.height,
-              //           //   (segWidth * canvas.width) / masksInfo.Image.width,
-              //           //   (segHeight * canvas.height) / masksInfo.Image.height
-              //           // );
-
-              //           const prevImageData = rletoImageData(
-              //             ctx,
-              //             prevMask.mask.segmentation,
-              //             masksInfo.Image,
-              //             prevMask.color
-              //           );
-              //           // 파란색으로 현재 마스크 표시하기
-              //           createImageBitmap(prevImageData).then(function (
-              //             imgBitmap
-              //           ) {
-              //             ctx.drawImage(
-              //               imgBitmap,
-              //               0,
-              //               0,
-              //               stylePosition.width,
-              //               stylePosition.height
-              //             );
-              //           });
-              //         }
-              //         // 현재 마스크 설정
-              //         currentMask.current = {
-              //           id: finalMask.id,
-              //           mask: finalMask,
-              //           color: {
-              //             r: pixelData[0],
-              //             g: pixelData[1],
-              //             b: pixelData[2],
-              //             a: pixelData[3],
-              //           },
-              //         };
-
-              //         // 현재 마스크 자리에 그려져 있던 색 지우기
-              //         const [x, y, segWidth, segHeight] = finalMask.bbox;
-              //         ctx.clearRect(
-              //           (x / masksInfo.Image.width) * canvas.width,
-              //           (y / masksInfo.Image.height) * canvas.height,
-              //           (segWidth * canvas.width) / masksInfo.Image.width,
-              //           (segHeight * canvas.height) / masksInfo.Image.height
-              //         );
-
-              //         // 파란색으로 현재 마스크 이미지 데이터 만들기
-              //         const currentImageData = rletoImageData(
-              //           ctx,
-              //           finalMask.segmentation,
-              //           masksInfo.Image,
-              //           {
-              //             r: 26,
-              //             g: 86,
-              //             b: 219,
-              //             a: 0.8 * 255,
-              //           }
-              //         );
-
-              //         // 파란색으로 현재 마스크 표시하기
-              //         createImageBitmap(currentImageData).then(function (
-              //           imgBitmap
-              //         ) {
-              //           ctx.drawImage(
-              //             imgBitmap,
-              //             0,
-              //             0,
-              //             stylePosition.width,
-              //             stylePosition.height
-              //           );
-              //         });
-
-              //         // const [x, y, segWidth, segHeight] = finalMask.bbox;
-              //         // const [dataX, dataY] = finalMask.point_coords;
-
-              //         // ctx.fillStyle = "red";
-
-              //         // ctx.strokeRect(
-              //         //   (x / masksInfo.Image.width) * canvas.width,
-              //         //   (y / masksInfo.Image.height) * canvas.height,
-              //         //   (segWidth * canvas.width) / masksInfo.Image.width,
-              //         //   (segHeight * canvas.height) / masksInfo.Image.height
-              //         // );
-
-              //         // createImageBitmap(imageData).then(function (imgBitmap) {
-              //         //   ctx.drawImage(
-              //         //     imgBitmap,
-              //         //     0,
-              //         //     0,
-              //         //     stylePosition.width,
-              //         //     stylePosition.height
-              //         //   );
-              //         // });
-              //       }
-              //     }
-
-              //     // console.log("Mask ID:", finalMask.id);
-              //     // console.log("Point Coords:", finalMask.point_coords);
-              //   }
-              // }
-
-              // console.log(mouseX, mouseY);
             }}
             style={stylePosition}
             className="absolute"
