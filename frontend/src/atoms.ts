@@ -3,6 +3,7 @@ import {
   Annotation,
   MaskColorWithID,
   MasksInfo,
+  PDFToPNGResponse,
 } from "./interfaces/Interfaces";
 
 export interface Region {
@@ -49,6 +50,11 @@ export interface Size {
 //   key: "docImgSrcState",
 //   default: null,
 // });
+
+export const pdfImageState = atom<PDFToPNGResponse | null>({
+  key: "pdfImageState",
+  default: null,
+});
 
 export const imageState = atom<HTMLImageElement | null>({
   key: "imageState",

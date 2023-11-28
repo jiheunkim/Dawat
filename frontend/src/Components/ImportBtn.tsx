@@ -6,12 +6,14 @@ import {
   colorPaletteState,
   imageState,
   masksInfoState,
+  pdfImageState,
   selectedAnnotState,
 } from "../atoms";
 import { ChangePdfToPng, postAutoAnnotReq, postImageUpload } from "../api/dawatAxios";
 
 const ImportBtn = () => {
   const [image, setImage] = useRecoilState(imageState);
+  const [pdfImage, setPdfImage] = useRecoilState(pdfImageState);
   const [masksInfo, setMasksInfo] = useRecoilState(masksInfoState);
   const [selectedAnnot, setSelectedAnnot] = useRecoilState(selectedAnnotState);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,6 +22,7 @@ const ImportBtn = () => {
   const [colorPalette, setColorPalette] = useRecoilState(colorPaletteState);
 
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPdfImage(null);
     setMasksInfo(null);
     setSelectedAnnot(null);
     setColorPalette([]);
@@ -31,6 +34,9 @@ const ImportBtn = () => {
         // PDF 파일인 경우
         const fileUploadResult = await ChangePdfToPng(file);
         if (fileUploadResult) {
+          setPdfImage(fileUploadResult.data);
+          console.log(fileUploadResult.data);
+
           const firstPageImageUrl = fileUploadResult.data["0"]?.url
           const firstPageImageTitle = fileUploadResult.data["0"]?.title;
 

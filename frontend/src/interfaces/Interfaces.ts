@@ -84,13 +84,3 @@ export interface PDFToPNGResponse {
     url: string;
   };
 }
-
-// export interface Segment {
-//   id: number;
-//   bbox: number[];
-//   area: number;
-//   point_coords: Array<number[]>;
-//   crop_box: number[];
-//   title: string;
-//   tag?: string;
-// }
