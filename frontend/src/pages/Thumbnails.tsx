@@ -1,19 +1,27 @@
-import ImageCanvas from "../components/ImageCanvas";
+import { useRecoilState } from "recoil";
+import { imageState, pdfImageState } from "../atoms";
 import ToolSideBar from "../components/ToolSideBar";
+import ThumbnailsBox from "../components/ThumbnailsBox";
 
 function Thumbnails() {
-  return <div className="h-full w-full flex">
-    <ToolSideBar />
-    <aside
-      id="sidebar"
-      className="flex flex-none h-full z-40 w-72 md:w-75 bg-gray-50 transition-width"
-    >
-      <div className="h-screen w-full overflow-y-auto pt-20 px-5">
-        <p className="text-xl font-bold mb-3">Thumbnails</p>
+  const [image, setImage] = useRecoilState(imageState);
+  const [pdfImage, setPdfImage] = useRecoilState(pdfImageState);
+
+  return (
+    <div className="h-full w-full flex">
+      <ToolSideBar />
+      <ThumbnailsBox />
+      <div
+        className="mt-16 w-full relative overflow-hidden"
+      >
+        <img
+          alt=""
+          className=""
+          src={image?.src || (pdfImage && Object.values(pdfImage)[0]?.url) || ''}
+        />
       </div>
-    </aside>
-    {/* <ImageCanvas /> */}
-  </div>
+    </div>
+  );
 }
 
 export default Thumbnails;
