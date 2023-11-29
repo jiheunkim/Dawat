@@ -8,11 +8,17 @@ import {
   masksInfoState,
   pdfImageState,
   selectedAnnotState,
+  uploadedFileNameState,
 } from "../atoms";
-import { ChangePdfToPng, postAutoAnnotReq, postImageUpload } from "../api/dawatAxios";
+import {
+  ChangePdfToPng,
+  postAutoAnnotReq,
+  postImageUpload,
+} from "../api/dawatAxios";
 
 const ImportBtn = () => {
   const [image, setImage] = useRecoilState(imageState);
+  const [fileName, setFileName] = useRecoilState(uploadedFileNameState);
   const [pdfImage, setPdfImage] = useRecoilState(pdfImageState);
   const [masksInfo, setMasksInfo] = useRecoilState(masksInfoState);
   const [selectedAnnot, setSelectedAnnot] = useRecoilState(selectedAnnotState);
@@ -37,7 +43,7 @@ const ImportBtn = () => {
           setPdfImage(fileUploadResult.data);
           console.log(fileUploadResult.data);
 
-          const firstPageImageUrl = fileUploadResult.data["0"]?.url
+          const firstPageImageUrl = fileUploadResult.data["0"]?.url;
           const firstPageImageTitle = fileUploadResult.data["0"]?.title;
 
           if (firstPageImageUrl) {
@@ -45,7 +51,9 @@ const ImportBtn = () => {
             const firstPageImage = new Image();
             firstPageImage.src = firstPageImageUrl;
             firstPageImage.onload = async () => {
-              const fetchedMaskInfo = await postAutoAnnotReq(firstPageImageTitle);
+              const fetchedMaskInfo = await postAutoAnnotReq(
+                firstPageImageTitle
+              );
               if (fetchedMaskInfo) {
                 console.log("POST 요청 성공2:", fetchedMaskInfo.data);
                 setMasksInfo(fetchedMaskInfo.data);
@@ -55,7 +63,7 @@ const ImportBtn = () => {
                 setIsLoading(false);
               }
               setImage(firstPageImage);
-            }
+            };
           } else {
             console.error("POST 요청 최종 실패");
             setIsLoading(false);
@@ -75,6 +83,7 @@ const ImportBtn = () => {
             const fileUploadResult = await postImageUpload(file);
             if (fileUploadResult) {
               console.log("POST 요청 성공:", fileUploadResult.data);
+              setFileName(file.name);
               const fetchedMaskInfo = await postAutoAnnotReq(file.name);
               if (fetchedMaskInfo) {
                 console.log("POST 요청 성공2:", fetchedMaskInfo.data);

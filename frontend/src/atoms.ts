@@ -60,6 +60,16 @@ export const imageState = atom<HTMLImageElement | null>({
   key: "imageState",
   default: null,
 });
+//ADD 버튼 클릭했을 경우 때문에 추가함
+export const addButtonClickedState = atom({
+  key: "addButtonClickedState",
+  default: false,
+});
+
+export const uploadedFileNameState = atom<string>({
+  key: "uploadedFileNameState",
+  default: "",
+});
 
 export const masksInfoState = atom<MasksInfo | null>({
   key: "masksInfoState",

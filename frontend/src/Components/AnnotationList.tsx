@@ -6,10 +6,19 @@ import {
   colorPaletteState,
   masksInfoState,
   selectedAnnotState,
+  addButtonClickedState,
 } from "../atoms";
 import { Annotation, MaskColorWithID } from "../interfaces/Interfaces";
 
 function AnnotationList() {
+  //add 버튼 클릭 확인 용
+  const [addButtonClicked, setAddButtonClicked] = useRecoilState(
+    addButtonClickedState
+  );
+  //마찬가지로 add 버튼 클릭 이벤트 처리
+  const handleAddButtonClick = () => {
+    setAddButtonClicked(true); // 상태를 true로 변경
+  };
   // 검색어 설정하는 useState
   const [search, setSearch] = useState("");
   // 원본 annotaion에 대한 배열
@@ -58,7 +67,7 @@ function AnnotationList() {
         <div className="flex justify-between items-center mb-3">
           <p className="text-xl font-bold">Annotation</p>
           <button
-            // onClick={} // annotation list add 이벤트 추가
+            onClick={handleAddButtonClick}
             className="bg-black text-sm text-white px-4 py-1 rounded-md ml-1"
           >
             Add
