@@ -26,7 +26,7 @@ function ThumbnailsBox() {
             <img
               key={index}
               alt={image.title}
-              className="mb-3"
+              className="border-2 border-zinc-600 mt-5 mb-3"
               src={image.url}
               onClick={() => handleImageClick(image)}
             />
