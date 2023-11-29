@@ -1,5 +1,9 @@
 import axios, { AxiosResponse, isAxiosError } from "axios";
-import { ImageUploadResponse, MasksInfo, PDFToPNGResponse } from "../interfaces/Interfaces";
+import {
+  ImageUploadResponse,
+  MasksInfo,
+  PDFToPNGResponse,
+} from "../interfaces/Interfaces";
 
 const dawatAxios = axios.create({
   baseURL: "http://norispaceserver.iptime.org:8000",
@@ -37,11 +41,9 @@ export const ChangePdfToPng = async (
   file: File
 ): Promise<AxiosResponse<PDFToPNGResponse, any> | null> => {
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append("file", file);
   try {
-    const response = await dawatAxios.post("upload/pdf/dawat", 
-      formData
-    );
+    const response = await dawatAxios.post("upload/pdf/dawat", formData);
     return response;
   } catch (error) {
     if (isAxiosError<PDFToPNGResponse>(error)) {
@@ -54,11 +56,9 @@ export const ChangePdfToPng = async (
 };
 
 // Export
-export const exportFile = async (
-  file_name: string
-): Promise<string | null> => {
+export const exportFile = async (file_name: string): Promise<string | null> => {
   try {
-    const response = await dawatAxios.get("download/"+file_name);
+    const response = await dawatAxios.get("download/" + file_name);
     // 여기서 성공적인 응답 여부를 확인하고 메시지를 반환
     if (response.status === 200) {
       return response.data;
@@ -69,7 +69,7 @@ export const exportFile = async (
   } catch (error) {
     // 에러 발생 시 콘솔에 로그 출력 및 null 반환
     console.log(`Error: ${error}`);
-      return null;
+    return null;
   }
 };
 
@@ -157,4 +157,28 @@ export const deleteAnnot = async (
   }
 };
 
-// Annotation 추가
+export const editAnnot = async (
+  file_name: string,
+  annotation_id: number,
+  segmentation: string,
+  bbox_coordinates: number[],
+  area: number
+): Promise<AxiosResponse<MasksInfo, any> | null> => {
+  try {
+    const response = await dawatAxios.post("modify_annotation", {
+      file_name,
+      annotation_id,
+      segmentation,
+      bbox_coordinates,
+      area,
+    });
+    return response;
+  } catch (error) {
+    if (isAxiosError<MasksInfo>(error)) {
+      console.log(`Error: ${error.response?.status} ${error.message}`);
+      return null;
+    } else {
+      return null;
+    }
+  }
+};

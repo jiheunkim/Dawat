@@ -61,6 +61,11 @@ export const imageState = atom<HTMLImageElement | null>({
   default: null,
 });
 
+export const uploadedFileNameState = atom<string>({
+  key: "uploadedFileNameState",
+  default: "",
+});
+
 export const masksInfoState = atom<MasksInfo | null>({
   key: "masksInfoState",
   default: null,
