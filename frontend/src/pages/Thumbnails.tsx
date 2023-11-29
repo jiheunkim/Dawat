@@ -14,8 +14,22 @@ function Thumbnails() {
     <div className="h-full w-full flex relative">
       <ToolSideBar />
       <ThumbnailsBox />
-      <div className="h-screen w-full overflow-y-auto bg-slate-700 ">
-        <div className="flex items-center justify-center">
+      <div className="h-screen w-full overflow-y-auto bg-slate-700 mr-12 ">
+        
+        {/* arrow 이미지 */}
+        <div className="flex items-center justify-end mt-32 z-10">
+          <img src="/image/angle-arrow-pointing-right.png"
+            style={{
+              width: "50px", // 이미지의 너비
+              height: "50px", // 이미지의 높이
+              filter: "brightness(70%)", // 밝기 조절 (원본의 70%)
+              marginRight: "4px"
+            }}
+          />
+        </div>
+
+
+        <div className="flex items-center justify-center z-0">
           <div className="mt-32 relative flex flex-col">
 
             {/* 조건부 렌더링 사용 */}
