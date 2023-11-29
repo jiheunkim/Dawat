@@ -1,18 +1,16 @@
-import "../css/Footer.css";
-
 function Footer() {
   return (
     <>
-      <div className="footer-bg">
-        <div className="footer-container">
+      <div className="border-t border-gray-200 justify-center items-center py-4">
+        <div className="flex items-center justify-center mt-3">
           <img
-            className="fab fa-typo1"
+            className="mr-1 h-6 sm:h-9"
             alt="logo"
             src="/image/dawat_logo_p.png"
           />
-          DAWAT
+          <p className="text-center text-2xl mb-2">DAWAT</p>
         </div>
-        <p className="info-text">ⓒ2023. DAWAT. All rights reserved.</p>
+        <p className="text-center text-gray-400 mb-3">ⓒ2023. DAWAT. All rights reserved.</p>
       </div>
     </>
   );

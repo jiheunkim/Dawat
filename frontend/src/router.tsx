@@ -5,6 +5,15 @@ import NotFound from "./components/NotFound";
 import Guide from "./pages/Guide";
 import Thumbnails from "./pages/Thumbnails";
 import Annotation from "./pages/Annotation";
+import GuideImport from "./guides/GuideImport";
+import GuideExport from "./guides/GuideExport";
+import GuideDrag from "./guides/GuideDrag";
+import GuideSelect from "./guides/GuideSelect";
+import GuideEverything from "./guides/GuideEverything";
+import GuideBBox from "./guides/GuideBBox";
+import GuideAnnotationList from "./guides/GuideAnnotationList";
+import GuideAnnotationSearch from "./guides/GuideAnnotationSearch";
+import GuideAnnotationAdd from "./guides/GuideAnnotationAdd";
 
 const router = createBrowserRouter([
   {
@@ -27,6 +36,42 @@ const router = createBrowserRouter([
       {
         path: "howtouse", // "HowtoUse" 페이지 경로 설정
         element: <Guide />, // "Guide" 페이지 연결
+      },
+      {
+        path: "learn-more/import",
+        element: <GuideImport />,
+      },
+      {
+        path: "learn-more/export",
+        element: <GuideExport />,
+      },
+      {
+        path: "learn-more/drag",
+        element: <GuideDrag />,
+      },
+      {
+        path: "learn-more/select",
+        element: <GuideSelect />,
+      },
+      {
+        path: "learn-more/everything",
+        element: <GuideEverything />,
+      },
+      {
+        path: "learn-more/bbox",
+        element: <GuideBBox />,
+      },
+      {
+        path: "learn-more/annotation-list",
+        element: <GuideAnnotationList />,
+      },
+      {
+        path: "learn-more/annotation-search",
+        element: <GuideAnnotationSearch />,
+      },
+      {
+        path: "learn-more/annotation-add",
+        element: <GuideAnnotationAdd />,
       },
     ],
   },
