@@ -182,3 +182,29 @@ export const editAnnot = async (
     }
   }
 };
+
+export const plusAnnot = async (
+  file_name: string,
+  segmentation: string,
+  bbox_coordinates: number[],
+  point_coords: number[],
+  area: number
+): Promise<AxiosResponse<MasksInfo, any> | null> => {
+  try {
+    const response = await dawatAxios.post("plus_annotation", {
+      file_name,
+      segmentation,
+      bbox_coordinates,
+      point_coords,
+      area,
+    });
+    return response;
+  } catch (error) {
+    if (isAxiosError<MasksInfo>(error)) {
+      console.log(`Error: ${error.response?.status} ${error.message}`);
+      return null;
+    } else {
+      return null;
+    }
+  }
+};

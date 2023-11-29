@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { editAnnot } from "../api/dawatAxios";
+import { editAnnot, plusAnnot } from "../api/dawatAxios";
 import { useRecoilState } from "recoil";
 import {
   colorPaletteState,
@@ -8,6 +8,7 @@ import {
   masksInfoState,
   selectedAnnotState,
   uploadedFileNameState,
+  addButtonClickedState,
 } from "../atoms";
 import { handleImageScaleForCanvas } from "../helpers/scaleHelper";
 import {
@@ -85,6 +86,9 @@ function getRandomColor() {
 }
 
 function ImageCanvas() {
+  const [addButtonClicked, setAddButtonClicked] = useRecoilState(
+    addButtonClickedState
+  ); //이거 마스크 추가 때문에 add 버튼 클릭 유무 확인 용
   function getImagePosition() {
     const imageTopLeft = applyToPoint(inverse(matrix), { x: 0, y: 0 });
     const imageBottomRight = applyToPoint(inverse(matrix), {
@@ -99,7 +103,13 @@ function ImageCanvas() {
       height: imageBottomRight.y - imageTopLeft.y,
     };
   }
-
+  //밑에 useEffect는 add 버튼 클릭하면 콘솔에 출력하는건데 set(false)를 bbox 그리고 false로 바꿔줘야 할듯
+  useEffect(() => {
+    if (addButtonClicked) {
+      console.log("add 클릭 확인!");
+      //setAddButtonClicked(false); //여기 수정 필요
+    }
+  }, [addButtonClicked]);
   // 캔버스에서의 마우스 위치
   const [selectedMask, setSelectedMask] = useState(0); //마스크 선택된거
   const mousePosition = useRef({ x: 0, y: 0 });
@@ -426,7 +436,7 @@ function ImageCanvas() {
 
       setBboxToolActive(false);
       // 여기가 BBOX 왼쪽 상단 좌표랑 오른쪽 하단 좌표야!! 이걸 수정할때 민재한테 넘겨야 함.
-      if (editState == true) {
+      if (editState == true && !addButtonClicked) {
         console.log("편집할 ID:", tmp);
         console.log(bboxrealstart, bboxEnd);
         console.log(rleEncodedMask);
@@ -461,6 +471,47 @@ function ImageCanvas() {
           }
         } catch (error) {
           console.error("마스크 수정 요청 실패:", error);
+        }
+
+        setTmp(0);
+        setEditState(false);
+      } else {
+        setAddButtonClicked(false);
+        //여기가 마스크 추가 부분인데 바꿀 필요가 있음요
+        console.log("헬로우! 당신은 이제 add를 할거에요!");
+
+        const decodedArray = rleDecode(rleEncodedMask, imageWidth, imageHeight);
+        console.log(decodedArray);
+        const area = decodedArray.reduce(
+          (acc, cur) => acc + (cur === 1 ? 1 : 0),
+          0
+        );
+
+        console.log("Area:", area);
+        console.log("file 이름:", selectedFile);
+        const bbox_coordinates = [
+          bboxrealstart.x,
+          bboxrealstart.y,
+          bboxEnd.x - bboxrealstart.x,
+          bboxEnd.y - bboxrealstart.y,
+        ];
+        const point_coords = [0, 0];
+        try {
+          const response = await plusAnnot(
+            selectedFile, // file_name
+            rleEncodedMask, // segmentation
+            bbox_coordinates, // bbox_coordinates
+            point_coords,
+            area
+          );
+
+          if (response) {
+            console.log("마스크 추가 요청 성공:", response);
+            console.log(bbox_coordinates);
+            setMasksInfo(response.data);
+          }
+        } catch (error) {
+          console.error("마스크 추가 요청 실패:", error);
         }
 
         setTmp(0);
