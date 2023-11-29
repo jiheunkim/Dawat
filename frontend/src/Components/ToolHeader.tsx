@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { Button, Navbar } from "flowbite-react";
 import { BiImport, BiSolidFileExport } from "react-icons/bi";
 import ImportBtn from "./ImportBtn";
+import ExportBtn from "./ExportBtn";
 
 const theme = {
   active: {
@@ -64,10 +65,11 @@ function ToolHeader() {
         {isToolPage && (
           <div className="flex space-x-3">
             <ImportBtn />
-            <Button color="blue">
+            <ExportBtn />
+            {/* <Button color="blue">
               <BiSolidFileExport className="mr-2 h-5 w-5" />
               <p>Export</p>
-            </Button>
+            </Button> */}
           </div>
         )}
       </div>

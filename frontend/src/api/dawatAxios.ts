@@ -1,5 +1,5 @@
 import axios, { AxiosResponse, isAxiosError } from "axios";
-import { ImageUploadResponse, MasksInfo } from "../interfaces/Interfaces";
+import { ImageUploadResponse, MasksInfo, PDFToPNGResponse } from "../interfaces/Interfaces";
 
 const dawatAxios = axios.create({
   baseURL: "http://norispaceserver.iptime.org:8000",
@@ -33,6 +33,45 @@ export const postImageUpload = async (
 };
 
 // pdf to png
+export const ChangePdfToPng = async (
+  file: File
+): Promise<AxiosResponse<PDFToPNGResponse, any> | null> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  try {
+    const response = await dawatAxios.post("upload/pdf/dawat", 
+      formData
+    );
+    return response;
+  } catch (error) {
+    if (isAxiosError<PDFToPNGResponse>(error)) {
+      console.log(`Error: ${error.response?.status} ${error.message}`);
+      return null;
+    } else {
+      return null;
+    }
+  }
+};
+
+// Export
+export const exportFile = async (
+  file_name: string
+): Promise<string | null> => {
+  try {
+    const response = await dawatAxios.get("download/"+file_name);
+    // 여기서 성공적인 응답 여부를 확인하고 메시지를 반환
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      console.log(`Error: ${response.status} ${response.statusText}`);
+      return null;
+    }
+  } catch (error) {
+    // 에러 발생 시 콘솔에 로그 출력 및 null 반환
+    console.log(`Error: ${error}`);
+      return null;
+  }
+};
 
 // Annotation 생성
 export const postAutoAnnotReq = async (

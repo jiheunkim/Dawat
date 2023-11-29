@@ -6,12 +6,14 @@ import {
   colorPaletteState,
   imageState,
   masksInfoState,
+  pdfImageState,
   selectedAnnotState,
 } from "../atoms";
-import { postAutoAnnotReq, postImageUpload } from "../api/dawatAxios";
+import { ChangePdfToPng, postAutoAnnotReq, postImageUpload } from "../api/dawatAxios";
 
 const ImportBtn = () => {
   const [image, setImage] = useRecoilState(imageState);
+  const [pdfImage, setPdfImage] = useRecoilState(pdfImageState);
   const [masksInfo, setMasksInfo] = useRecoilState(masksInfoState);
   const [selectedAnnot, setSelectedAnnot] = useRecoilState(selectedAnnotState);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,6 +22,7 @@ const ImportBtn = () => {
   const [colorPalette, setColorPalette] = useRecoilState(colorPaletteState);
 
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPdfImage(null);
     setMasksInfo(null);
     setSelectedAnnot(null);
     setColorPalette([]);
@@ -29,62 +32,35 @@ const ImportBtn = () => {
 
       if (file.type === "application/pdf") {
         // PDF 파일인 경우
-        // formData.append("file", file);
-        // const endpointUrl =
-        //   "http://norispaceserver.iptime.org:8000/upload/pdf/dawat";
-        // try {
-        //   const response = await fetch(endpointUrl, {
-        //     method: "POST",
-        //     body: formData,
-        //   });
-        //   if (!response.ok) {
-        //     throw new Error("네트워크 오류");
-        //   }
-        //   const responseData = await response.json();
-        //   console.log(responseData);
-        //   // 맨 첫 장의 이미지 URL을 사용하여 이미지 처리
-        //   const firstPageImageUrl = responseData["0"]?.url;
-        //   const firstPageImageTitle = responseData["0"]?.title;
-        //   if (firstPageImageUrl) {
-        //     // 맨 첫 장의 이미지를 저장하고 setImage() 함수에 전달
-        //     const firstPageImage = new Image();
-        //     firstPageImage.src = firstPageImageUrl;
-        //     firstPageImage.onload = () => {
-        //       const fileData = {
-        //         file_name: firstPageImageTitle,
-        //       };
-        //       // 2차 POST 요청 보내기
-        //       fetch(endpointUrl2, {
-        //         method: "POST",
-        //         headers: {
-        //           "Content-Type": "application/json",
-        //         },
-        //         body: JSON.stringify(fileData), // 데이터를 JSON 문자열로 변환하여 전송
-        //       })
-        //         .then((response) => {
-        //           if (!response.ok) {
-        //             throw new Error("네트워크 오류");
-        //           }
-        //           return response.json();
-        //         })
-        //         .then((responseData) => {
-        //           // 성공적인 응답 처리
-        //           console.log("POST 요청 성공2:", responseData);
-        //           setMasksInfo(responseData);
-        //           setIsLoading(false);
-        //         })
-        //         .catch((error) => {
-        //           // 오류 처리
-        //           console.error("POST 요청 실패:", error);
-        //           setIsLoading(false);
-        //         });
-        //       setImage(firstPageImage);
-        //       onImageUpload(file);
-        //     };
-        //   }
-        // } catch (error) {
-        //   console.error("PDF 업로드 및 처리 실패:", error);
-        // }
+        const fileUploadResult = await ChangePdfToPng(file);
+        if (fileUploadResult) {
+          setPdfImage(fileUploadResult.data);
+          console.log(fileUploadResult.data);
+
+          const firstPageImageUrl = fileUploadResult.data["0"]?.url
+          const firstPageImageTitle = fileUploadResult.data["0"]?.title;
+
+          if (firstPageImageUrl) {
+            // 맨 첫 장의 이미지를 저장하고 setImage() 함수에 전달
+            const firstPageImage = new Image();
+            firstPageImage.src = firstPageImageUrl;
+            firstPageImage.onload = async () => {
+              const fetchedMaskInfo = await postAutoAnnotReq(firstPageImageTitle);
+              if (fetchedMaskInfo) {
+                console.log("POST 요청 성공2:", fetchedMaskInfo.data);
+                setMasksInfo(fetchedMaskInfo.data);
+                setIsLoading(false);
+              } else {
+                console.log("POST 요청 성공2 실패");
+                setIsLoading(false);
+              }
+              setImage(firstPageImage);
+            }
+          } else {
+            console.error("POST 요청 최종 실패");
+            setIsLoading(false);
+          }
+        }
       } else if (file.type.startsWith("image/")) {
         // 이미지 파일인 경우
         reader.onload = (e) => {
@@ -112,52 +88,6 @@ const ImportBtn = () => {
               console.error("POST 요청 최종 실패");
               setIsLoading(false);
             }
-            // fetch(endpointUrl, {
-            //   method: "POST",
-            //   body: formData,
-            // })
-            //   .then((response) => {
-            //     if (!response.ok) {
-            //       throw new Error("네트워크 오류");
-            //     }
-            //     return response.json();
-            //   })
-            //   .then((responseData) => {
-            //     // 성공적인 응답 처리
-            //     console.log("POST 요청 성공:", responseData);
-
-            //     // 2차 POST 요청 보내기
-            //     fetch(endpointUrl2, {
-            //       method: "POST",
-            //       headers: {
-            //         "Content-Type": "application/json",
-            //       },
-            //       body: JSON.stringify(fileData), // 데이터를 JSON 문자열로 변환하여 전송
-            //     })
-            //       .then((response) => {
-            //         if (!response.ok) {
-            //           throw new Error("네트워크 오류");
-            //         }
-            //         return response.json();
-            //       })
-            //       .then((responseData) => {
-            //         // 성공적인 응답 처리
-            //         console.log("POST 요청 성공2:", responseData);
-
-            //         setMasksInfo(responseData);
-            //         setIsLoading(false);
-            //       })
-            //       .catch((error) => {
-            //         // 오류 처리
-            //         console.error("POST 요청 실패:", error);
-            //         setIsLoading(false);
-            //       });
-            //   })
-            //   .catch((error) => {
-            //     // 오류 처리
-            //     console.error("POST 요청 실패:", error);
-            //     setIsLoading(false);
-            //   });
             setImage(img);
           };
         };
