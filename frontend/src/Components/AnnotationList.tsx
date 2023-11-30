@@ -2,23 +2,10 @@ import { MdCircle, MdDelete } from "react-icons/md";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { useRecoilState } from "recoil";
-import {
-  colorPaletteState,
-  masksInfoState,
-  selectedAnnotState,
-  addButtonClickedState,
-} from "../atoms";
-import { Annotation, MaskColorWithID } from "../interfaces/Interfaces";
+import { masksInfoState, selectedAnnotState } from "../atoms";
+import { Annotation } from "../interfaces/Interfaces";
 
 function AnnotationList() {
-  //add 버튼 클릭 확인 용
-  const [addButtonClicked, setAddButtonClicked] = useRecoilState(
-    addButtonClickedState
-  );
-  //마찬가지로 add 버튼 클릭 이벤트 처리
-  const handleAddButtonClick = () => {
-    setAddButtonClicked(true); // 상태를 true로 변경
-  };
   // 검색어 설정하는 useState
   const [search, setSearch] = useState("");
   // 원본 annotaion에 대한 배열
@@ -26,9 +13,6 @@ function AnnotationList() {
   // 검색어가 적용되어 필터링된 annotation 배열
   const [filteredAnnots, setFilteredAnnots] = useState<Annotation[]>([]);
   const [masksInfo, setMasksInfo] = useRecoilState(masksInfoState);
-
-  // mask color
-  const [colorPalette, setColorPalette] = useRecoilState(colorPaletteState);
 
   const handleSearchChange = (e: { target: { value: string } }) => {
     const searchTerm = e.target.value.toLowerCase();
@@ -66,12 +50,6 @@ function AnnotationList() {
       <div className="mb-3">
         <div className="flex justify-between items-center mb-3">
           <p className="text-xl font-bold">Annotation</p>
-          <button
-            onClick={handleAddButtonClick}
-            className="bg-black text-sm text-white px-4 py-1 rounded-md ml-1"
-          >
-            Add
-          </button>
         </div>
         <input
           type="text"
@@ -88,26 +66,15 @@ function AnnotationList() {
         className="flex flex-col relative overflow-y-scroll scrollbar-hide"
       >
         {filteredAnnots.map((item) => {
-          return (
-            <AnnotComponent
-              {...item}
-              key={item.id}
-              color={colorPalette.find((elem) => elem.id === item.id)}
-            />
-          );
+          return <AnnotComponent {...item} key={item.id} />;
         })}
       </div>
     </div>
   );
 }
 
-// Annotation Component
-interface AnnotComponentProps extends Annotation {
-  color?: MaskColorWithID;
-}
-
 // segments 객체의 key를 순회하며 Annotation 항목 렌더링
-function AnnotComponent(props: AnnotComponentProps) {
+function AnnotComponent(props: Annotation) {
   const { title, id, color } = props;
   const currentAnnotRef = useRef<HTMLDivElement>(null);
   const [selectedAnnot, setSelectedAnnot] = useRecoilState(selectedAnnotState);
@@ -181,9 +148,7 @@ function AnnotComponent(props: AnnotComponentProps) {
         className="text-sm mr-2"
         style={
           color && {
-            color: `rgba(${color.r} , ${color.g}, ${color.b}, ${
-              color.a / 255
-            })`,
+            color: `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${0.3})`,
           }
         }
       />

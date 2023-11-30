@@ -3,7 +3,6 @@ import React, { useRef, useState } from "react";
 import { BiImport } from "react-icons/bi";
 import { useRecoilState } from "recoil";
 import {
-  colorPaletteState,
   imageState,
   masksInfoState,
   pdfImageState,
@@ -24,14 +23,11 @@ const ImportBtn = () => {
   const [selectedAnnot, setSelectedAnnot] = useRecoilState(selectedAnnotState);
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // 이미지 마스크 색상 팔레트
-  const [colorPalette, setColorPalette] = useRecoilState(colorPaletteState);
 
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setPdfImage(null);
     setMasksInfo(null);
     setSelectedAnnot(null);
-    setColorPalette([]);
     const file = e.target.files && e.target.files[0];
     if (file) {
       const reader = new FileReader();

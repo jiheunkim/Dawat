@@ -40,6 +40,7 @@ export interface MasksInfo {
 }
 
 export interface OriginalImg {
+  annotation_index: number;
   image_id: string;
   width: number;
   height: number;
@@ -49,6 +50,7 @@ export interface OriginalImg {
 export interface Annotation {
   title: string;
   bbox: number[];
+  color: number[];
   area: number;
   segmentation: string;
   point_coords: Array<number[]>;
@@ -59,16 +61,16 @@ export interface Annotation {
 
 // Canvas
 // 마스크 색상 인터페이스
-export interface MaskColor {
-  r: number;
-  g: number;
-  b: number;
-  a: number;
-}
+// export interface MaskColor {
+//   r: number;
+//   g: number;
+//   b: number;
+//   a: number;
+// }
 
-export interface MaskColorWithID extends MaskColor {
-  id: number;
-}
+// export interface MaskColorWithID extends MaskColor {
+//   id: number;
+// }
 
 // 이미지 업로드 요청 결과
 export interface ImageUploadResponse {
@@ -83,4 +85,9 @@ export interface PDFToPNGResponse {
     title: string;
     url: string;
   };
+}
+
+export interface ToolInfo {
+  name: string;
+  cursor: string;
 }
