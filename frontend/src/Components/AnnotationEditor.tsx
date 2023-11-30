@@ -1,12 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { MdEdit, MdClose } from "react-icons/md";
+import { MdEdit, MdClose, MdDraw } from "react-icons/md";
 import { useRecoilState } from "recoil";
-import { masksInfoState, selectedAnnotState } from "../atoms";
+import {
+  activeToolState,
+  editState,
+  masksInfoState,
+  reDrawState,
+  selectedAnnotState,
+} from "../atoms";
 import { Button, CustomFlowbiteTheme, Label, TextInput } from "flowbite-react";
 import { postNewTags, postNewTitle } from "../api/dawatAxios";
+import { HiOutlineArrowRight } from "react-icons/hi";
+import { ToolList } from "./Tools";
 
 function AnnotationEditor() {
+  //
+  const [isRedraw, setIsRedraw] = useRecoilState(reDrawState);
+  // 선택한 anntation
   const [selectedAnnot, setSelectedAnnot] = useRecoilState(selectedAnnotState);
+  // 전체 annotation 정보
   const [masksInfo, setMasksInfo] = useRecoilState(masksInfoState);
   // title input
   const [titleInput, setTitleInput] = useState<string>("");
@@ -14,7 +26,7 @@ function AnnotationEditor() {
   const [tagInput, setTagInput] = useState<string>("");
   // 선택된 annotation의 전체 태그
   const [tags, setTags] = useState<string[]>([]);
-  const [editMode, setEditMode] = useState<boolean>(false);
+  const [editMode, setEditMode] = useRecoilState(editState);
   // tag input focus 여부
   const [activeTagInput, setActiveTagInput] = useState<boolean>(false);
   // editor의 위치
@@ -22,6 +34,8 @@ function AnnotationEditor() {
     x: 0,
     y: 0,
   });
+  // 선택된 툴 상태
+  const [activeTool, setActiveTool] = useRecoilState(activeToolState);
 
   useEffect(() => {
     if (masksInfo && selectedAnnot) {
@@ -34,7 +48,7 @@ function AnnotationEditor() {
 
   useEffect(() => {
     if (selectedAnnot) {
-      // 태그가 "" 상태일때 split(",") 까지만 수행하면 ['']이 리턴되 렌더링 되면 안되는 컴포넌트가 렌더링된다.
+      // 태그가 "" 상태일때 split(",") 까지만 수행하면 ['']이 리턴되어 렌더링 되면 안되는 컴포넌트가 렌더링된다.
       const tagsArr = selectedAnnot.tag?.split(",").filter((tag) => tag !== "");
       const title = selectedAnnot.title;
 
@@ -194,7 +208,7 @@ function AnnotationEditor() {
               </Label>
             </div>
             <div
-              className={`box-border border ring-blue-700 flex flex-wrap items-center w-full p-2.5 text-gray-900 rounded-lg bg-gray-50 sm:text-xs
+              className={`box-border border ring-blue-700 mb-3 flex flex-wrap items-center w-full p-2.5 text-gray-900 rounded-lg bg-gray-50 sm:text-xs
               dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500
               ${
                 activeTagInput
@@ -230,9 +244,35 @@ function AnnotationEditor() {
                 disabled={!editMode}
               />
             </div>
+            {/* 마스크 수정 아이콘 */}
+            <div className="flex items-center justify-between mb-1 ml-1">
+              <Label className="font-semibold text-base" htmlFor="title">
+                Mask
+              </Label>
+              <Button
+                disabled={!editMode}
+                color="light"
+                className="text-sm p-0.1 focus:ring-2 focus:ring-blue-600"
+                size="xs"
+                onClick={(e) => {
+                  setIsRedraw(true);
+                  setActiveTool(ToolList[3]);
+                }}
+              >
+                Redraw
+                <MdDraw className="ml-1 text-sm" />
+              </Button>
+            </div>
+
             {editMode && (
-              <div className="mt-3 flex justify-end">
-                <Button size="sm" color="blue" pill type="submit">
+              <div className="mt-5 flex justify-end">
+                <Button
+                  className="text-sm p-0.1"
+                  size="sm"
+                  color="blue"
+                  pill
+                  type="submit"
+                >
                   Save
                 </Button>
               </div>

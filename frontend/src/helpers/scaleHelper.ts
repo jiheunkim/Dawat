@@ -1,6 +1,7 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 // All rights reserved.
 
+import { Matrix, compose, scale, translate } from "transformation-matrix";
 import { ImgSize } from "../interfaces/Interfaces";
 
 // This source code is licensed under the license found in the
@@ -41,4 +42,17 @@ const handleImageScaleForCanvas = (
   return { width: 0, height: 0 };
 };
 
-export { handleImageScaleForSam, handleImageScaleForCanvas };
+const handleZoom = (matrix: Matrix, direction: any, point: any) => {
+  const [mx, my] = [point.x, point.y];
+  const copyMatrix = { ...matrix };
+  let ratio =
+    typeof direction === "object"
+      ? direction.to / copyMatrix.a
+      : 1 + 0.2 * direction;
+  // NOTE: We're mutating matrix here
+  let updateMatrix = compose(copyMatrix, translate(mx, my), scale(ratio));
+  updateMatrix = compose(updateMatrix, translate(-mx, -my));
+  return updateMatrix;
+};
+
+export { handleImageScaleForSam, handleImageScaleForCanvas, handleZoom };

@@ -1,9 +1,9 @@
 import { atom } from "recoil";
 import {
   Annotation,
-  MaskColorWithID,
   MasksInfo,
   PDFToPNGResponse,
+  ToolInfo,
 } from "./interfaces/Interfaces";
 
 export interface Region {
@@ -60,11 +60,6 @@ export const imageState = atom<HTMLImageElement | null>({
   key: "imageState",
   default: null,
 });
-//ADD 버튼 클릭했을 경우 때문에 추가함
-export const addButtonClickedState = atom({
-  key: "addButtonClickedState",
-  default: false,
-});
 
 export const uploadedFileNameState = atom<string>({
   key: "uploadedFileNameState",
@@ -81,12 +76,26 @@ export const selectedAnnotState = atom<Annotation | null>({
   default: null,
 });
 
-export const isEditorVisibleState = atom<Boolean>({
+export const isEditorVisibleState = atom<boolean>({
   key: "isEditorVisibleState",
   default: false,
 });
 
-export const colorPaletteState = atom<MaskColorWithID[]>({
-  key: "colorPaletteState",
-  default: [],
+// 선택한 툴
+export const activeToolState = atom<ToolInfo>({
+  key: "activeToolState",
+  default: { name: "FaHandPaper", cursor: "grab" },
+});
+
+// 마스크 그리기 수정 모드
+export const reDrawState = atom<boolean>({
+  key: "reDrawState",
+  default: false,
+});
+
+// Annotation Edit Mode
+
+export const editState = atom<boolean>({
+  key: "editState",
+  default: false,
 });
