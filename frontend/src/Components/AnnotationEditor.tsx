@@ -48,12 +48,13 @@ function AnnotationEditor() {
 
   useEffect(() => {
     if (selectedAnnot) {
-      // 태그가 "" 상태일때 split(",") 까지만 수행하면 ['']이 리턴되어 렌더링 되면 안되는 컴포넌트가 렌더링된다.
-      const tagsArr = selectedAnnot.tag?.split(",").filter((tag) => tag !== "");
       const title = selectedAnnot.title;
+      let tagsArr: string[] = [];
+      if (Array.isArray(selectedAnnot.tag)) {
+        tagsArr = selectedAnnot.tag;
+      }
 
-      if (tagsArr && tagsArr.length !== 0) setTags(tagsArr);
-      else setTags([]);
+      setTags(tagsArr.filter((tag: string) => tag !== ""));
       setTitleInput(title);
     }
   }, [selectedAnnot]);
@@ -93,7 +94,7 @@ function AnnotationEditor() {
         const tagsUpdateResult = await postNewTags(
           masksInfo.Image.file_name,
           selectedAnnot.id,
-          newTags.join(",")
+          newTags
         );
         if (tagsUpdateResult) {
           reqSucess = true;

@@ -119,7 +119,7 @@ export const postNewTitle = async (
 export const postNewTags = async (
   image_name: string,
   id: number,
-  tags: string
+  tags: string[]
 ): Promise<AxiosResponse<MasksInfo, any> | null> => {
   try {
     const response = await dawatAxios.post("update_tags", {
