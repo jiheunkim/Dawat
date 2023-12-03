@@ -43,6 +43,17 @@ function Thumbnails() {
   const hasValidSrc =
     image?.src || (pdfImage && Object.values(pdfImage)[0]?.url);
 
+
+  const handleDeleteClick = () => {
+    // 현재 이미지를 배열에서 삭제하는 로직을 구현
+    const updatedImages = { ...images };
+    delete updatedImages[currentPageIndex];
+    setPdfImage(updatedImages);
+
+    // 삭제 후 첫 번째 이미지로 리셋하려면 다음 라인의 주석을 해제할 수 있습니다.
+    // setCurrentPageIndex(0);
+  };
+
   return (
     <div className="h-full w-full flex relative">
       <ToolSideBar />
@@ -56,49 +67,67 @@ function Thumbnails() {
         <div className="flex items-center justify-center" style={{ position: "relative" }}>
           <div className="mt-32 relative flex flex-col">
             {hasValidSrc && (
-              <img
-                alt=""
-                className="w-full h-full flex border-2 border-zinc-600"
-                src={hasValidSrc}
-                style={{ position: "relative", zIndex: 1 }}
-              />
+              <div>
+                <img
+                  alt=""
+                  className="w-full h-full flex border-2 border-zinc-600"
+                  src={hasValidSrc}
+                  style={{ position: "relative", zIndex: 1 }}
+                />
+                {isHovered && (
+                  <img
+                    src="/img/icon_delete.png"
+                    alt="삭제"
+                    className="delete-icon"
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      right: 0,
+                      cursor: "pointer",
+                    }}
+                    onClick={handleDeleteClick}
+                  />
+                ) && (
+                    <div
+                      className={`mx-auto flex w-full h-auto items-center justify-between absolute top-1/2 transform -translate-y-1/2 right-0 left-0 z-50 ${hasValidSrc ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                        }`}
+                    >
+                      {/* 화살표1 왼 */}
+                      <img
+                        src="/img/arrow_right.png"
+                        className="rotate-180 justify-self-start"
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          filter: "brightness(100%)",
+                          marginLeft: "40px",
+                          cursor: "pointer",
+                        }}
+                        onClick={goToPreviousPage}
+                      />
+
+                      {/* 화살표1 오 */}
+                      < img
+                        src="/img/arrow_right.png"
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          filter: "brightness(100%)",
+                          marginRight: "40px",
+                          cursor: "pointer",
+                        }}
+                        onClick={goToNextPage}
+                      />
+                    </div>
+                  )
+                }
+              </div>
             )}
           </div>
+
         </div>
-
-        {isHovered && (
-          <div
-            className={`mx-auto flex w-full h-auto items-center justify-between absolute top-1/2 transform -translate-y-1/2 right-0 left-0 z-50 ${hasValidSrc ? 'opacity-100' : 'opacity-0 pointer-events-none'
-              }`}
-          >
-            <img
-              src="/img/arrow_right.png"
-              className="rotate-180 justify-self-start"
-              style={{
-                width: "50px",
-                height: "50px",
-                filter: "brightness(100%)",
-                marginLeft: "40px",
-                cursor: "pointer",
-              }}
-              onClick={goToPreviousPage}
-            />
-
-            {/* 화살표1 오 */}
-            < img
-              src="/img/arrow_right.png"
-              style={{
-                width: "50px",
-                height: "50px",
-                filter: "brightness(100%)",
-                marginRight: "40px",
-                cursor: "pointer",
-              }}
-              onClick={goToNextPage}
-            />
-          </div>
-        )}
       </div>
+
     </div>
   );
 }
