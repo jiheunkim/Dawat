@@ -15,7 +15,7 @@ function Thumbnails() {
       <ToolSideBar />
       <ThumbnailsBox />
       <div className="h-screen w-full overflow-y-auto bg-slate-700 mr-12 ">
-        
+
         {/* arrow 이미지 */}
         <div className="flex items-center justify-end mt-32 z-10">
           <img src={process.env.PUBLIC_URL + '/img/angle-arrow-pointing-right.png'}
