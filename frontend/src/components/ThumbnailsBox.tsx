@@ -1,5 +1,6 @@
 import { useRecoilState } from "recoil";
 import { imageState, pdfImageState } from "../atoms";
+import { useState } from "react";
 
 function ThumbnailsBox() {
   const [image, setImage] = useRecoilState(imageState);
@@ -14,28 +15,26 @@ function ThumbnailsBox() {
     setImage(newImage);
   };
 
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const imageArray = Object.values(images);
 
   // 다음 이미지 페이지로 이동
   const goToNextPage = () => {
-    const imageKeys = Object.keys(images);
-    const currentIndex = imageKeys.findIndex((key) => images[key].url === image?.src);
-
-    if (currentIndex !== -1 && currentIndex < imageKeys.length - 1) {
-      const nextImageKey = imageKeys[currentIndex + 1];
-      const nextImage = images[nextImageKey];
-      setImage((prevImage) => ({ ...prevImage, src: nextImage.url } as HTMLImageElement));
+    if (currentPageIndex < imageArray.length - 1) {
+      const nextImage = imageArray[currentPageIndex + 1];
+      handleImageClick(nextImage);
+      setCurrentPageIndex(currentPageIndex + 1);
     }
+    
   };
   // 이전 이미지 페이지로 이동
   const goToPreviousPage = () => {
-    const imageKeys = Object.keys(images);
-    const currentIndex = imageKeys.findIndex((key) => images[key].url === image?.src);
-
-    if (currentIndex !== -1 && currentIndex > 0) {
-      const previousImageKey = imageKeys[currentIndex - 1];
-      const previousImage = images[previousImageKey];
-      setImage((prevImage) => ({ ...prevImage, src: previousImage.url } as HTMLImageElement));
+    if (currentPageIndex > 0) {
+      const previousImage = imageArray[currentPageIndex - 1];
+      handleImageClick(previousImage);
+      setCurrentPageIndex(currentPageIndex - 1);
     }
+    
   };
 
 
