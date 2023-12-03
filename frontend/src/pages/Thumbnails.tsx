@@ -72,7 +72,7 @@ function Thumbnails() {
               }`}
           >
             <img
-              src="/img/angle-arrow-pointing-right.png"
+              src="/img/arrow_right.png"
               className="rotate-180 justify-self-start"
               style={{
                 width: "50px",
@@ -84,8 +84,9 @@ function Thumbnails() {
               onClick={goToPreviousPage}
             />
 
-            <img
-              src="/img/angle-arrow-pointing-right.png"
+            {/* 화살표1 오 */}
+            < img
+              src="/img/arrow_right.png"
               style={{
                 width: "50px",
                 height: "50px",
