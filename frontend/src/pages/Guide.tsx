@@ -192,7 +192,7 @@ const Guide = () => {
                         <img
                             className="flex mt-5 mb-5 ml-20"
                             alt="document"
-                            src={process.env.PUBLIC_URL + '/img/dawat_example.png'}
+                            src="/img/dawat_sample_document.png"
                             width='300'
                         />
                         <canvas className="w-full h-full relative"></canvas>

@@ -36,7 +36,7 @@ function ToolHeader() {
         <img
           alt="Dawat Logo"
           className="mr-1 h-6 sm:h-9"
-          src={process.env.PUBLIC_URL + '/img/dawat_logo_p.png'}
+          src="/img/dawat_logo_2.png"
         />
         <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
           DAWAT
