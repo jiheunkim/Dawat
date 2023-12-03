@@ -36,7 +36,7 @@ function ToolHeader() {
         <img
           alt="Dawat Logo"
           className="mr-1 h-6 sm:h-9"
-          src="/img/dawat_logo_0.png"
+          src="/img/dawat_logo.png"
         />
         <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
           DAWAT
