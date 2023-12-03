@@ -85,7 +85,7 @@ function Thumbnails() {
 
             {/* 화살표1 왼 */}
             <img
-              src="/image/angle-arrow-pointing-right.png"
+              src="/img/arrow_right.png"
               className="rotate-180 justify-self-start"
               style={{
                 width: "50px", // 이미지의 너비
@@ -97,7 +97,7 @@ function Thumbnails() {
 
             {/* 화살표1 오 */}
             < img
-              src="/image/angle-arrow-pointing-right.png"
+              src="/img/arrow_right.png"
               style={{
                 width: "50px", // 이미지의 너비
                 height: "50px", // 이미지의 높이
