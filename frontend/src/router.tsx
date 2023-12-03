@@ -13,7 +13,6 @@ import GuideEverything from "./guides/GuideEverything";
 import GuideBBox from "./guides/GuideBBox";
 import GuideAnnotationList from "./guides/GuideAnnotationList";
 import GuideAnnotationSearch from "./guides/GuideAnnotationSearch";
-import GuideAnnotationAdd from "./guides/GuideAnnotationAdd";
 
 const router = createBrowserRouter([
   {
@@ -68,10 +67,6 @@ const router = createBrowserRouter([
       {
         path: "learn-more/annotation-search",
         element: <GuideAnnotationSearch />,
-      },
-      {
-        path: "learn-more/annotation-add",
-        element: <GuideAnnotationAdd />,
       },
     ],
   },
