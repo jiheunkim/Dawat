@@ -6,7 +6,7 @@ function Footer() {
           <img
             className="mr-1 h-6 sm:h-9"
             alt="logo"
-            src="/img/dawat_logo_2.png"
+            src="/img/dawat_logo_0.png"
           />
           <p className="text-center text-2xl mb-2">DAWAT</p>
         </div>
