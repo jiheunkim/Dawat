@@ -18,7 +18,7 @@ function Thumbnails() {
         
         {/* arrow 이미지 */}
         <div className="flex items-center justify-end mt-32 z-10">
-          <img src={process.env.PUBLIC_URL + '/image/angle-arrow-pointing-right.png'}
+          <img src={process.env.PUBLIC_URL + '/img/angle-arrow-pointing-right.png'}
             style={{
               width: "50px", // 이미지의 너비
               height: "50px", // 이미지의 높이
