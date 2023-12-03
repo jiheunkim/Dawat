@@ -14,6 +14,31 @@ function ThumbnailsBox() {
     setImage(newImage);
   };
 
+
+  // 다음 이미지 페이지로 이동
+  const goToNextPage = () => {
+    const imageKeys = Object.keys(images);
+    const currentIndex = imageKeys.findIndex((key) => images[key].url === image?.src);
+
+    if (currentIndex !== -1 && currentIndex < imageKeys.length - 1) {
+      const nextImageKey = imageKeys[currentIndex + 1];
+      const nextImage = images[nextImageKey];
+      setImage((prevImage) => ({ ...prevImage, src: nextImage.url } as HTMLImageElement));
+    }
+  };
+  // 이전 이미지 페이지로 이동
+  const goToPreviousPage = () => {
+    const imageKeys = Object.keys(images);
+    const currentIndex = imageKeys.findIndex((key) => images[key].url === image?.src);
+
+    if (currentIndex !== -1 && currentIndex > 0) {
+      const previousImageKey = imageKeys[currentIndex - 1];
+      const previousImage = images[previousImageKey];
+      setImage((prevImage) => ({ ...prevImage, src: previousImage.url } as HTMLImageElement));
+    }
+  };
+
+
   return (
     <>
       <aside
