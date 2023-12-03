@@ -15,29 +15,6 @@ function ThumbnailsBox() {
     setImage(newImage);
   };
 
-  const [currentPageIndex, setCurrentPageIndex] = useState(0);
-  const imageArray = Object.values(images);
-
-  // 다음 이미지 페이지로 이동
-  const goToNextPage = () => {
-    if (currentPageIndex < imageArray.length - 1) {
-      const nextImage = imageArray[currentPageIndex + 1];
-      handleImageClick(nextImage);
-      setCurrentPageIndex(currentPageIndex + 1);
-    }
-    
-  };
-  // 이전 이미지 페이지로 이동
-  const goToPreviousPage = () => {
-    if (currentPageIndex > 0) {
-      const previousImage = imageArray[currentPageIndex - 1];
-      handleImageClick(previousImage);
-      setCurrentPageIndex(currentPageIndex - 1);
-    }
-    
-  };
-
-
   return (
     <>
       <aside

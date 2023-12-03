@@ -6,6 +6,7 @@ import {
   imageState,
   masksInfoState,
   pdfImageState,
+  //pngImageState,
   selectedAnnotState,
   uploadedFileNameState,
 } from "../atoms";
@@ -19,13 +20,16 @@ const ImportBtn = () => {
   const [image, setImage] = useRecoilState(imageState);
   const [fileName, setFileName] = useRecoilState(uploadedFileNameState);
   const [pdfImage, setPdfImage] = useRecoilState(pdfImageState);
+  //const [pngImage, setPngImage] = useRecoilState(pngImageState);
   const [masksInfo, setMasksInfo] = useRecoilState(masksInfoState);
   const [selectedAnnot, setSelectedAnnot] = useRecoilState(selectedAnnotState);
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    //setImage(null);
     setPdfImage(null);
+    //setPngImage(null);
     setMasksInfo(null);
     setSelectedAnnot(null);
     const file = e.target.files && e.target.files[0];
@@ -60,12 +64,19 @@ const ImportBtn = () => {
               }
               setImage(firstPageImage);
             };
-          } else {
+          }
+
+
+
+
+          else {
             console.error("POST 요청 최종 실패");
             setIsLoading(false);
           }
         }
-      } else if (file.type.startsWith("image/")) {
+      }
+
+      else if (file.type.startsWith("image/") || file.name.toLowerCase().endsWith(".png")) {
         // 이미지 파일인 경우
         reader.onload = (e) => {
           const result = e.target?.result as string;
@@ -77,26 +88,45 @@ const ImportBtn = () => {
 
             // POST 요청 보내기
             const fileUploadResult = await postImageUpload(file);
+
             if (fileUploadResult) {
               console.log("POST 요청 성공:", fileUploadResult.data);
-              setFileName(file.name);
-              const fetchedMaskInfo = await postAutoAnnotReq(file.name);
-              if (fetchedMaskInfo) {
-                console.log("POST 요청 성공2:", fetchedMaskInfo.data);
-                setMasksInfo(fetchedMaskInfo.data);
-                setIsLoading(false);
-              } else {
-                console.log("POST 요청 성공2 실패");
-                setIsLoading(false);
+              setFileName(file.name)
+
+              const firstPageImage = new Image();
+              firstPageImage.src = img.src;
+              firstPageImage.onload = async () => {
+                const fetchedMaskInfo = await postAutoAnnotReq(
+                  file.name
+                );
+                if (fetchedMaskInfo) {
+                  console.log("POST 요청 성공2:", fetchedMaskInfo.data);
+                  setMasksInfo(fetchedMaskInfo.data);
+                  setIsLoading(false);
+                } else {
+                  console.log("POST 요청 성공2 실패");
+                  setIsLoading(false);
+                }
+
+                // 맨 첫 장의 이미지를 저장하고 setImage() 함수에 전달
+                setImage(firstPageImage);
+
+
+
               }
-            } else {
+            }
+            else {
               console.error("POST 요청 최종 실패");
               setIsLoading(false);
             }
-            setImage(img);
+
+            //setImage(img);
           };
         };
         reader.readAsDataURL(file);
+
+
+
       }
     }
   };
@@ -128,7 +158,7 @@ const ImportBtn = () => {
         <input
           ref={fileInputRef}
           id="file-input"
-          accept=".pdf, image/*"
+          accept=".pdf, image/*, .png"
           type="file"
           style={{ display: "none" }}
           onChange={(e) => onUpload(e)}

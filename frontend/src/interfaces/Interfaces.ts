@@ -1,3 +1,8 @@
+
+
+
+
+
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 // All rights reserved.
 
@@ -74,9 +79,11 @@ export interface Annotation {
 
 // 이미지 업로드 요청 결과
 export interface ImageUploadResponse {
+  [key: string]: {
   status: string;
   file_name: string;
   message: string;
+  };
 }
 
 // PdfToPng 변환 요청 결과
