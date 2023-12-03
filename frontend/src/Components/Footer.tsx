@@ -6,7 +6,7 @@ function Footer() {
           <img
             className="mr-1 h-6 sm:h-9"
             alt="logo"
-            src="/image/dawat_logo_p.png"
+            src={process.env.PUBLIC_URL + '/image/dawat_logo_p.png'}
           />
           <p className="text-center text-2xl mb-2">DAWAT</p>
         </div>

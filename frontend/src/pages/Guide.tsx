@@ -152,20 +152,6 @@ const Guide = () => {
                                 <div className="mb-3">
                                     <div className="flex justify-between items-center mb-3">
                                     <p className="text-xl font-bold">Annotation</p>
-                                    <button
-                                        className="bg-black text-sm text-white px-4 py-1 rounded-md ml-1"
-                                        onMouseEnter={(event) => {
-                                            const targetElement = event.target as HTMLElement;
-                                            showDemoVideo(
-                                                "/video/AnnotationAddVideo.mp4",
-                                                "annotation-add",
-                                                "If you have an annotation list you want to register, you can add it!",
-                                                targetElement.getBoundingClientRect()
-                                            );
-                                        }}
-                                    >
-                                        Add
-                                    </button>
                                     </div>
                                     <input
                                     type="text"
@@ -206,7 +192,7 @@ const Guide = () => {
                         <img
                             className="flex mt-5 mb-5 ml-20"
                             alt="document"
-                            src="/image/dawat_example.png"
+                            src={process.env.PUBLIC_URL + '/image/dawat_example.png'}
                             width='300'
                         />
                         <canvas className="w-full h-full relative"></canvas>
