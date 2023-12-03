@@ -5,11 +5,11 @@ import ToolSideBar from "../components/ToolSideBar";
 function Annotation() {
 
   return (
-  <div className="h-full w-full flex">
-    <ToolSideBar />
-    <AnnotationBox />
-    <ImageCanvas />
-  </div>
+    <div className="h-full w-full flex">
+      <ToolSideBar />
+      <AnnotationBox />
+      <ImageCanvas />
+    </div>
   );
 }
 
