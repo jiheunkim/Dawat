@@ -1,8 +1,3 @@
-
-
-
-
-
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 // All rights reserved.
 
@@ -61,7 +56,7 @@ export interface Annotation {
   point_coords: Array<number[]>;
   crop_box: number[];
   id: number;
-  tag?: string;
+  tag?: string[];
 }
 
 // Canvas
@@ -80,9 +75,9 @@ export interface Annotation {
 // 이미지 업로드 요청 결과
 export interface ImageUploadResponse {
   [key: string]: {
-  status: string;
-  file_name: string;
-  message: string;
+    status: string;
+    file_name: string;
+    message: string;
   };
 }
 
@@ -92,6 +87,18 @@ export interface PDFToPNGResponse {
     title: string;
     url: string;
   };
+}
+
+// PdfToPng 변환 요청 결과
+export interface PdfInfo {
+  title: string;
+  url: string;
+}
+
+export interface DocumentInfo {
+  file_name: string;
+  src: string;
+  id: number;
 }
 
 export interface ToolInfo {

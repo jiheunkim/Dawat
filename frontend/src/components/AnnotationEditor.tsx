@@ -81,20 +81,12 @@ function AnnotationEditor() {
           setTitleInput("");
         }
       }
-      // 태그가 바뀐 경우
-      if (tags.join(",") !== selectedAnnot.tag) {
-        // 공백 값 있으면 제거
-        const newTags = tags.filter((tag) => tag !== "");
-        if (newTags.length === 0 && selectedAnnot.tag === undefined) {
-          // 원래도 태그가 정의되어 있지 않았는데, 결과적으로 입력된 태그가 아무것도 없는 경우
-          setEditMode(false);
-          setActiveTagInput(false);
-          return;
-        }
+      // 태그가 있는 경우
+      if (tags) {
         const tagsUpdateResult = await postNewTags(
           masksInfo.Image.file_name,
           selectedAnnot.id,
-          newTags
+          tags
         );
         if (tagsUpdateResult) {
           reqSucess = true;

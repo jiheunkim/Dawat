@@ -22,8 +22,13 @@ function AnnotationList() {
     }
 
     const filteredAnnotations = originalAnnots.filter(
-      (segment: { title: string }) =>
-        segment.title.toLowerCase().includes(searchTerm)
+      (annotation: Annotation) => {
+        // 검색어가 title 또는 tag 중 하나에 포함되어 있는 경우 필터링
+        return (
+          annotation.title.toLowerCase().includes(searchTerm) ||
+          annotation.tag?.some((tag) => tag.toLowerCase().includes(searchTerm))
+        );
+      }
     );
 
     // 필터링된 결과를 state에 업데이트
