@@ -3,8 +3,6 @@ import App from "./App";
 import Home from "./pages/Home";
 import NotFound from "./components/NotFound";
 import Guide from "./pages/Guide";
-import Thumbnails from "./pages/Thumbnails";
-import Annotation from "./pages/Annotation";
 import GuideImport from "./guides/GuideImport";
 import GuideExport from "./guides/GuideExport";
 import GuideDrag from "./guides/GuideDrag";
@@ -13,6 +11,10 @@ import GuideEverything from "./guides/GuideEverything";
 import GuideBBox from "./guides/GuideBBox";
 import GuideAnnotationList from "./guides/GuideAnnotationList";
 import GuideAnnotationSearch from "./guides/GuideAnnotationSearch";
+import ToolPage from "./pages/ToolPage";
+import AnnotationBox from "./components/AnnotationBox";
+import ThumbnailsBox from "./components/ThumbnailsBox";
+import ImageCanvas from "./components/ImageCanvas";
 
 const router = createBrowserRouter([
   {
@@ -25,12 +27,19 @@ const router = createBrowserRouter([
         element: <Home />, // "Home" 페이지 연결
       },
       {
-        path: "tool-thumbnails", // "Tool" 페이지 경로 설정
-        element: <Thumbnails />, // "Thumbnails" 페이지 연결
-      },
-      {
-        path: "tool-annotation", // "Tool" 페이지 경로 설정
-        element: <Annotation />, // "Annotation" 페이지 연결
+        path: "tool",
+        element: <ToolPage />,
+        errorElement: <NotFound />,
+        children: [
+          {
+            path: "annotation",
+            element: <AnnotationBox />,
+          },
+          {
+            path: "thumbnail", // "Tool" 페이지 경로 설정
+            element: <ThumbnailsBox />, // "Thumbnails" 페이지 연결
+          },
+        ],
       },
       {
         path: "howtouse", // "HowtoUse" 페이지 경로 설정

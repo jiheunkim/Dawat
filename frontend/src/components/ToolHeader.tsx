@@ -13,7 +13,7 @@ const theme = {
 };
 function ToolHeader() {
   const location = useLocation();
-  const isToolPage = location.pathname.includes("/tool-"); // '/tool-'로 시작하는 페이지 여부 판단
+  const isToolPage = location.pathname.includes("/tool"); // '/tool-'로 시작하는 페이지 여부 판단
   const [activeLink, setActiveLink] = useState("");
   const [image, setImage] = useState(null);
 
@@ -49,8 +49,8 @@ function ToolHeader() {
           </Navbar.Link>
           <Navbar.Link
             theme={theme}
-            href="/tool-thumbnails"
-            className={getButtonStyle2("/tool-thumbnails", "/tool-annotation")}
+            href="/tool/thumbnail"
+            className={getButtonStyle2("/tool/thumbnail", "/tool/annotation")}
           >
             Tool
           </Navbar.Link>

@@ -1,6 +1,7 @@
 import { atom } from "recoil";
 import {
   Annotation,
+  DocumentInfo,
   MasksInfo,
   PDFToPNGResponse,
   ToolInfo,
@@ -51,8 +52,8 @@ export interface Size {
 //   default: null,
 // });
 
-export const pdfImageState = atom<PDFToPNGResponse | null>({
-  key: "pdfImageState",
+export const docListState = atom<DocumentInfo[] | null>({
+  key: "docListState",
   default: null,
 });
 
@@ -61,10 +62,10 @@ export const imageState = atom<HTMLImageElement | null>({
   default: null,
 });
 
-export const uploadedFileNameState = atom<string>({
-  key: "uploadedFileNameState",
-  default: "",
-});
+// export const uploadedFileNameState = atom<string>({
+//   key: "uploadedFileNameState",
+//   default: "",
+// });
 
 export const masksInfoState = atom<MasksInfo | null>({
   key: "masksInfoState",

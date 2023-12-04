@@ -1,16 +1,16 @@
+import { Outlet } from "react-router";
 import AnnotationBox from "../components/AnnotationBox";
 import ImageCanvas from "../components/ImageCanvas";
 import ToolSideBar from "../components/ToolSideBar";
 
-function Annotation() {
-
+function ToolPage() {
   return (
     <div className="h-full w-full flex">
       <ToolSideBar />
-      <AnnotationBox />
+      <Outlet />
       <ImageCanvas />
     </div>
   );
 }
 
-export default Annotation;
+export default ToolPage;

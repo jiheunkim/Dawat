@@ -6,10 +6,10 @@ import {
   isEditorVisibleState,
   masksInfoState,
   selectedAnnotState,
-  uploadedFileNameState,
   activeToolState,
   reDrawState,
   editState,
+  docListState,
 } from "../atoms";
 import { handleImageScaleForCanvas, handleZoom } from "../helpers/scaleHelper";
 import { Annotation, ImgSize, MasksInfo } from "../interfaces/Interfaces";
@@ -44,10 +44,13 @@ function ImageCanvas() {
   //     //setAddButtonClicked(false); //여기 수정 필요
   //   }
   // }, [addButtonClicked]);
+  // 문서 전체 리스트
+  const [docList, setDocList] = useRecoilState(docListState);
   // Annotation Edit 모드 여부
   const [editMode, setEditMode] = useRecoilState(editState);
   // 마스크 수정 상태 여부
   const [isRedraw, setIsRedraw] = useRecoilState(reDrawState);
+
   // 캔버스에서의 마우스 위치
   const [selectedMask, setSelectedMask] = useState(0); //마스크 선택된거
   const mousePosition = useRef({ x: 0, y: 0 });
@@ -79,27 +82,10 @@ function ImageCanvas() {
   const [activeTool, setActiveTool] = useRecoilState(activeToolState);
   const [isDragging, setIsDragging] = useState(false);
   // const [cursorStyle, setCursorStyle] = useState("default");
-  const [selectedFile, setSelectedFile] = useRecoilState(uploadedFileNameState);
+  // const [selectedFile, setSelectedFile] = useRecoilState(uploadedFileNameState);
   const [selectedAnnot, setSelectedAnnot] = useRecoilState(selectedAnnotState);
   // const [isEditorVisible, setIsEditorVisible] =
   //   useRecoilState(isEditorVisibleState);
-
-  const imagePosition = {
-    topLeft: applyToPoint(inverse(matrix), { x: 0, y: 0 }),
-    bottomRight: applyToPoint(inverse(matrix), {
-      x: imgSize.width,
-      y: imgSize.height,
-    }),
-  };
-
-  const stylePosition = {
-    // imageRendering: "pixelated",
-    left: imagePosition.topLeft.x,
-    top: imagePosition.topLeft.y,
-    width: imagePosition.bottomRight.x - imagePosition.topLeft.x,
-    height: imagePosition.bottomRight.y - imagePosition.topLeft.y,
-    maxWidth: imagePosition.bottomRight.x - imagePosition.topLeft.x,
-  };
 
   // 현재 선택된 마스크 타입
   interface CurrentMask {
@@ -110,21 +96,20 @@ function ImageCanvas() {
 
   const currentMask = useRef<CurrentMask | null>(null);
 
-  // //11월 27일 변경 코드
-  // useEffect(() => {
-  //   console.log(selectedMask); // 상태가 업데이트될 때마다 콘솔에 출력
-  //   setEditState(true);
-  //   setTmp(selectedMask);
-  // }, [selectedMask]); //여기 useEffect 부분이 클릭시 선택된 마스크 id값을 출력받으려고 일부러 만든건데, 이때 bbox 바뀐걸 선택해서 segmentation으로 백에 보내야 해.
+  useEffect(() => {
+    const canvas = canvasRef.current!!;
+    const ctx = canvas.getContext("2d")!!;
+    ctx.fillStyle = "#9ca3af";
+    // 캔버스 크기의 사각형으로 채우기
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }, []);
+
   useEffect(() => {
     const { width, height } = handleImageScaleForCanvas(
       image,
       canvasRef.current
     );
     setImgSize({ width, height });
-    const canvas = canvasRef.current!!;
-    const ctx = canvas.getContext("2d")!!;
-    ctx.fillStyle = "gray";
   }, [image, windowSize, masksInfo, matrix]);
 
   useEffect(() => {
@@ -175,6 +160,8 @@ function ImageCanvas() {
       if (masksInfo) {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         maskDrawing(masksInfo);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
       if (currentMaskRef.current) {
         const currentMaskCanvas = currentMaskRef.current;
@@ -517,7 +504,7 @@ function ImageCanvas() {
           );
 
           console.log("Area:", area);
-          console.log("file 이름:", selectedFile);
+          // console.log("file 이름:", selectedFile);
           const bbox_coordinates = [
             bboxStart.x,
             bboxStart.y,
@@ -526,7 +513,7 @@ function ImageCanvas() {
           ];
           try {
             const response = await editAnnot(
-              selectedFile, // file_name
+              docList!!.find((item) => item.src === image!!.src)!!.file_name, // file_name
               selectedAnnot!!.id, // annotation_id
               rleEncodedMask, // segmentation
               bbox_coordinates, // bbox_coordinates
@@ -563,7 +550,7 @@ function ImageCanvas() {
           );
 
           console.log("Area:", area);
-          console.log("file 이름:", selectedFile);
+          // console.log("file 이름:", selectedFile);
           const bbox_coordinates = [
             bboxStart.x,
             bboxStart.y,
@@ -573,7 +560,7 @@ function ImageCanvas() {
           const point_coords = [0, 0];
           try {
             const response = await plusAnnot(
-              selectedFile, // file_name
+              docList!!.find((item) => item.src === image!!.src)!!.file_name, // file_name
               rleEncodedMask, // segmentation
               bbox_coordinates, // bbox_coordinates
               point_coords,
@@ -714,6 +701,23 @@ function ImageCanvas() {
     //     setEditState(false);
     //   }
     // }
+  };
+
+  const imagePosition = {
+    topLeft: applyToPoint(inverse(matrix), { x: 0, y: 0 }),
+    bottomRight: applyToPoint(inverse(matrix), {
+      x: imgSize.width,
+      y: imgSize.height,
+    }),
+  };
+
+  const stylePosition = {
+    // imageRendering: "pixelated",
+    left: imagePosition.topLeft.x,
+    top: imagePosition.topLeft.y,
+    width: imagePosition.bottomRight.x - imagePosition.topLeft.x,
+    height: imagePosition.bottomRight.y - imagePosition.topLeft.y,
+    maxWidth: imagePosition.bottomRight.x - imagePosition.topLeft.x,
   };
 
   return (
