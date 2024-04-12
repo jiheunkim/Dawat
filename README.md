@@ -41,6 +41,27 @@
 - [x] 서비스 사용법 안내 영상 제공
 <br><br><br>
 
+## 📂 실행 화면
+### 시작 페이지 (HOME)
+![296544224-fe244eb0-50ef-4fea-9309-1dc45fff4900](https://github.com/jiheunkim/Dawat/assets/80433455/f56e025d-805e-4038-8b89-236054862aaf)
+![296544417-292e1d3e-39ed-48dd-8538-1d1268a6abbf](https://github.com/jiheunkim/Dawat/assets/80433455/c692829b-3faf-4a96-8faf-b089a4d14620)
+![296544486-be29d332-5f01-474d-87a8-9feea7473110](https://github.com/jiheunkim/Dawat/assets/80433455/1f9d0c8f-17ba-4e2d-8e5f-1f20b30d61b7)
+<br>
+
+### Tool 페이지 (Thumbnails)
+![296544654-3dcf68c6-abcd-4da0-b973-721c589a4c22](https://github.com/jiheunkim/Dawat/assets/80433455/52298aaf-5f15-4c9d-afe9-113f4475aca4)
+<br>
+
+### Tool 페이지 (Annotation)
+![296544804-47ba204e-f3ce-4b1f-a536-6585f9198ae9](https://github.com/jiheunkim/Dawat/assets/80433455/87c3dedf-65fd-49fa-a7fd-9431a4baaba5)
+![296545011-dab133a0-43ca-464a-8770-5f3e87beba79](https://github.com/jiheunkim/Dawat/assets/80433455/b407ed84-4c5b-4268-88eb-d48418dfbeab)
+![296545200-3a7d8024-3e09-47e7-b41e-2b68f4036a04](https://github.com/jiheunkim/Dawat/assets/80433455/05e060e3-9b10-4e66-9496-fc621e482234)
+<br>
+
+### How to Use 페이지
+![296545287-fc7611e1-8286-4f83-b866-3992297c97e4](https://github.com/jiheunkim/Dawat/assets/80433455/89bf0258-4ef8-448e-ba76-ffccd4f3b98e)
+<br><br><br>
+
 ## ⏰ 프로젝트 기간
 2023.09.06 ~ 2023.12.04
 <br><br><br>
